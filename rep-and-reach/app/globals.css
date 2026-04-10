@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F7F7F5;
+  --color-bg-dark: #0A0A0A;
+  --color-text-primary: #0A0A0A;
+  --color-text-secondary: #6B6B6B;
+  --color-text-tertiary: #9E9E9E;
+  --color-text-inverse: #FFFFFF;
+  --color-border-light: rgba(0, 0, 0, 0.08);
+  --color-border-medium: rgba(0, 0, 0, 0.15);
+  --color-border-dark: rgba(0, 0, 0, 0.30);
+}
+
+@theme inline {
+  --color-brand-bg: var(--color-bg);
+  --color-brand-bg-secondary: var(--color-bg-secondary);
+  --color-brand-bg-dark: var(--color-bg-dark);
+  --color-brand-primary: var(--color-text-primary);
+  --color-brand-secondary: var(--color-text-secondary);
+  --color-brand-tertiary: var(--color-text-tertiary);
+  --color-brand-inverse: var(--color-text-inverse);
+  --color-brand-border-light: var(--color-border-light);
+  --color-brand-border-medium: var(--color-border-medium);
+  --color-brand-border-dark: var(--color-border-dark);
+
+  /* Instrument Serif loaded via Google Fonts link in layout.tsx head.
+     Fallback to Georgia if unavailable (e.g. offline builds).
+     TODO: Replace with next/font/google import when Google Fonts is accessible. */
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-body: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Lock body scroll when mobile nav is open */
+body.nav-open {
+  overflow: hidden;
+}
