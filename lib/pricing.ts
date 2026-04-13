@@ -113,10 +113,6 @@ export const ADDON_SERVICES = [
       src: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=900&q=80&auto=format&fit=crop',
       alt: 'CRM dashboard for managing gym leads',
     },
-    cardImage: {
-      src: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop',
-      alt: 'Gym staff following up with a lead on their phone',
-    },
     prices: priced('monthly', {
       'en-gb': 1295,
       'en-ie': 1495,
@@ -150,10 +146,6 @@ export const ADDON_SERVICES = [
       src: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=900&q=80&auto=format&fit=crop',
       alt: 'Local search results showing gym listings on Google Maps',
     },
-    cardImage: {
-      src: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80&auto=format&fit=crop',
-      alt: 'Google Business Profile and local search results on a smartphone',
-    },
     prices: priced('monthly', {
       'en-gb': 349,
       'en-ie': 395,
@@ -182,10 +174,6 @@ export const ADDON_SERVICES = [
       src: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=900&q=80&auto=format&fit=crop',
       alt: 'Organic social media content for a fitness brand',
     },
-    cardImage: {
-      src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80&auto=format&fit=crop',
-      alt: 'Social media content being created for a fitness studio',
-    },
     prices: priced('monthly', {
       'en-gb': 349,
       'en-ie': 395,
@@ -201,7 +189,6 @@ export const ADDON_SERVICES = [
   includes: string[]
   bestFor: string
   image: ServiceImage
-  cardImage: ServiceImage
 })[]
 
 /**

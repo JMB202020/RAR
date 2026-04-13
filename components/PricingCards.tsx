@@ -125,8 +125,8 @@ export default function PricingCards({
           >
             <div className="relative aspect-[16/10] w-full bg-brand-bg-secondary">
               <Image
-                src={addon.cardImage.src}
-                alt={addon.cardImage.alt}
+                src={addon.image.src}
+                alt={addon.image.alt}
                 fill
                 sizes="(min-width: 1024px) 360px, (min-width: 768px) 33vw, 100vw"
                 className="object-cover"
