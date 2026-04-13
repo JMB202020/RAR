@@ -1,10 +1,15 @@
+'use client'
+
 import Link from 'next/link'
 import FadeUp from './FadeUp'
+import { useLocale } from '@/lib/useLocale'
+import { localePath } from '@/lib/locales'
 
 // TODO: Replace with real case studies (lib/case-studies.ts) once first
 // cohort results are in. Until then we tell the truth: nothing to show yet.
 
 export default function ResultsGrid() {
+  const locale = useLocale()
   return (
     <section className="bg-white py-20 md:py-[120px]">
       <div className="mx-auto max-w-[1160px] px-6 lg:px-20">
@@ -31,7 +36,7 @@ export default function ResultsGrid() {
               and what results you can expect.
             </p>
             <Link
-              href="/contact"
+              href={localePath(locale, '/contact')}
               className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
             >
               Book a discovery call <span aria-hidden>&rarr;</span>

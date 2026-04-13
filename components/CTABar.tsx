@@ -1,7 +1,12 @@
+'use client'
+
 import Link from 'next/link'
 import FadeUp from './FadeUp'
+import { useLocale } from '@/lib/useLocale'
+import { localePath } from '@/lib/locales'
 
 export default function CTABar() {
+  const locale = useLocale()
   return (
     <section className="bg-brand-bg-dark py-20 md:py-[120px]">
       <div className="mx-auto max-w-[1160px] px-6 text-center lg:px-20">
@@ -18,7 +23,7 @@ export default function CTABar() {
         <FadeUp delay={0.16}>
           <div className="mt-10 flex flex-col items-center gap-4">
             <Link
-              href="/contact"
+              href={localePath(locale, '/contact')}
               className="inline-flex items-center gap-1.5 rounded-[6px] border border-brand-inverse px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-colors duration-150 hover:bg-brand-inverse hover:text-brand-primary"
             >
               Book a call <span aria-hidden>&rarr;</span>

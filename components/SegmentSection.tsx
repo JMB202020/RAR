@@ -1,6 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import FadeUp from './FadeUp'
+import { useLocale } from '@/lib/useLocale'
+import { localePath } from '@/lib/locales'
 
 interface SegmentSectionProps {
   eyebrow: string
@@ -17,6 +21,7 @@ export default function SegmentSection({
   bullets,
   alt,
 }: SegmentSectionProps) {
+  const locale = useLocale()
   return (
     <section
       className={`py-20 md:py-[120px] ${
@@ -45,7 +50,7 @@ export default function SegmentSection({
             ))}
             <FadeUp delay={0.32}>
               <Link
-                href="/contact"
+                href={localePath(locale, '/contact')}
                 className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] border border-brand-primary px-7 py-3 text-[15px] font-medium text-brand-primary transition-colors duration-150 hover:bg-brand-primary hover:text-brand-inverse"
               >
                 Book a call <span aria-hidden>&rarr;</span>

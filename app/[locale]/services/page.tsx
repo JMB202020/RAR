@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Check } from 'lucide-react'
 import Hero from '@/components/Hero'
 import PricingCards from '@/components/PricingCards'
@@ -11,6 +12,7 @@ import {
   type ServicePricing,
 } from '@/lib/pricing'
 import PriceLabel from '@/components/PriceLabel'
+import { isLocale, localePath, type LocaleSlug } from '@/lib/locales'
 
 export const metadata: Metadata = {
   title: 'Services — Rep & Reach',
@@ -37,7 +39,14 @@ const SERVICES: ServiceDetail[] = [
   ...ADDON_SERVICES.map((a) => ({ ...a, kind: 'addon' as const })),
 ]
 
-export default function ServicesPage() {
+interface PageProps {
+  params: Promise<{ locale: string }>
+}
+
+export default async function ServicesPage({ params }: PageProps) {
+  const { locale } = await params
+  if (!isLocale(locale)) notFound()
+
   return (
     <>
       <Hero
@@ -55,6 +64,7 @@ export default function ServicesPage() {
           key={service.slug}
           service={service}
           alt={idx % 2 === 0}
+          locale={locale}
         />
       ))}
 
@@ -66,9 +76,11 @@ export default function ServicesPage() {
 function ServiceDetailSection({
   service,
   alt,
+  locale,
 }: {
   service: ServiceDetail
   alt: boolean
+  locale: LocaleSlug
 }) {
   return (
     <section
@@ -106,7 +118,7 @@ function ServiceDetailSection({
             </FadeUp>
             <FadeUp delay={0.24}>
               <Link
-                href="/contact"
+                href={localePath(locale, '/contact')}
                 className="mt-8 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-7 py-3 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
               >
                 Get started <span aria-hidden>&rarr;</span>

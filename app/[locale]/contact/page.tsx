@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { Check } from 'lucide-react'
 import Hero from '@/components/Hero'
 import ContactForm from '@/components/ContactForm'
 import FadeUp from '@/components/FadeUp'
 import { TARGET_SEGMENTS } from '@/lib/constants'
+import { isLocale } from '@/lib/locales'
 
 export const metadata: Metadata = {
   title: 'Book a Discovery Call — Rep & Reach',
@@ -25,7 +27,13 @@ const EXPECTATIONS = [
   'Response within one business day',
 ]
 
-export default function ContactPage() {
+interface PageProps {
+  params: Promise<{ locale: string }>
+}
+
+export default async function ContactPage({ params }: PageProps) {
+  const { locale } = await params
+  if (!isLocale(locale)) notFound()
   return (
     <>
       <Hero

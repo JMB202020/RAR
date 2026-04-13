@@ -1,28 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { DEFAULT_LOCALE, type Locale } from './pricing'
+import { usePathname } from 'next/navigation'
+import { DEFAULT_LOCALE, extractLocale, type LocaleSlug } from './locales'
 
 /**
- * useLocale — returns the viewer's pricing locale.
+ * useLocale — returns the current locale based on the URL.
  *
- * Today this just inspects the browser language on mount and picks between
- * 'en-GB' (default) and 'en-US'. Kept as a hook so we can later swap in a
- * cookie-backed / IP-based / user-preference locale without touching every
- * component that displays a price.
+ * Reads the first segment of the pathname (e.g. /en-us/services -> 'en-us').
+ * Falls back to the default locale on routes that aren't under [locale]/
+ * (such as the internal /styles preview page).
  */
-export function useLocale(): Locale {
-  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
-
-  useEffect(() => {
-    if (typeof navigator === 'undefined') return
-    const lang = navigator.language.toLowerCase()
-    if (lang.startsWith('en-us') || lang === 'en') {
-      // Conservative default: only switch to USD on explicit en-US.
-      // TODO: also honour en-CA, en-AU with their own locales once added.
-      if (lang.startsWith('en-us')) setLocale('en-US')
-    }
-  }, [])
-
-  return locale
+export function useLocale(): LocaleSlug {
+  const pathname = usePathname() ?? ''
+  return extractLocale(pathname) ?? DEFAULT_LOCALE
 }

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import Hero from '@/components/Hero'
 import CTABar from '@/components/CTABar'
 import FadeUp from '@/components/FadeUp'
+import { isLocale, localePath } from '@/lib/locales'
 
 export const metadata: Metadata = {
   title: 'Results — Rep & Reach',
@@ -17,7 +19,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ResultsPage() {
+interface PageProps {
+  params: Promise<{ locale: string }>
+}
+
+export default async function ResultsPage({ params }: PageProps) {
+  const { locale } = await params
+  if (!isLocale(locale)) notFound()
+
   return (
     <>
       <Hero
@@ -40,7 +49,7 @@ export default function ResultsPage() {
                 approach and what results you can expect.
               </p>
               <Link
-                href="/contact"
+                href={localePath(locale, '/contact')}
                 className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
               >
                 Book a discovery call <span aria-hidden>&rarr;</span>

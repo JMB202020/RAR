@@ -11,6 +11,8 @@ import {
   REFERRAL_SOURCES,
   FORMSPREE_ID,
 } from '@/lib/constants'
+import { useLocale } from '@/lib/useLocale'
+import { localePath } from '@/lib/locales'
 
 interface FormData {
   name: string
@@ -24,6 +26,7 @@ interface FormData {
 }
 
 export default function ContactForm() {
+  const locale = useLocale()
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
@@ -71,7 +74,7 @@ export default function ContactForm() {
           day to arrange a call.
         </p>
         <Link
-          href="/services"
+          href={localePath(locale, '/services')}
           className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
         >
           <span aria-hidden>&larr;</span> Back to services

@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import Hero from '@/components/Hero'
 import SegmentSection from '@/components/SegmentSection'
 import CTABar from '@/components/CTABar'
+import { isLocale } from '@/lib/locales'
 
 export const metadata: Metadata = {
   title: 'Who We Work With — Rep & Reach',
@@ -84,7 +86,13 @@ const SEGMENTS = [
   },
 ]
 
-export default function WhoWeWorkWithPage() {
+interface PageProps {
+  params: Promise<{ locale: string }>
+}
+
+export default async function WhoWeWorkWithPage({ params }: PageProps) {
+  const { locale } = await params
+  if (!isLocale(locale)) notFound()
   return (
     <>
       <Hero

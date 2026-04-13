@@ -1,5 +1,14 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { NAV_LINKS, FOOTER_SERVICE_LINKS } from '@/lib/constants'
+import {
+  DEFAULT_LOCALE,
+  extractLocale,
+  localePath,
+} from '@/lib/locales'
+import LocalePicker from './LocalePicker'
 
 const FOOTER_PAGE_LINKS = [
   { label: 'Home', href: '/' },
@@ -7,6 +16,10 @@ const FOOTER_PAGE_LINKS = [
 ]
 
 export default function Footer() {
+  const pathname = usePathname() ?? '/'
+  const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
+  const homeHref = localePath(locale, '/')
+
   return (
     <footer className="border-t border-[var(--color-border-light)] bg-white">
       <div className="mx-auto max-w-[1160px] px-6 pt-20 pb-10 lg:px-20">
@@ -14,7 +27,7 @@ export default function Footer() {
           {/* Column 1 — Brand */}
           <div>
             <Link
-              href="/"
+              href={homeHref}
               className="text-[15px] font-semibold tracking-[0.06em] text-brand-primary"
             >
               REP &amp; REACH
@@ -26,6 +39,9 @@ export default function Footer() {
               &copy; {new Date().getFullYear()} Rep &amp; Reach. All rights
               reserved.
             </p>
+            <div className="mt-6">
+              <LocalePicker variant="inline" />
+            </div>
           </div>
 
           {/* Column 2 — Pages */}
@@ -37,7 +53,7 @@ export default function Footer() {
               {FOOTER_PAGE_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
-                    href={link.href}
+                    href={localePath(locale, link.href)}
                     className="text-[14px] text-brand-secondary transition-colors duration-150 hover:text-brand-primary"
                   >
                     {link.label}
@@ -54,9 +70,9 @@ export default function Footer() {
             </p>
             <ul className="mt-5 flex flex-col gap-3">
               {FOOTER_SERVICE_LINKS.map((link) => (
-                <li key={link.href}>
+                <li key={link.path}>
                   <Link
-                    href={link.href}
+                    href={localePath(locale, link.path)}
                     className="text-[14px] text-brand-secondary transition-colors duration-150 hover:text-brand-primary"
                   >
                     {link.label}

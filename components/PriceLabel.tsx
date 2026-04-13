@@ -1,10 +1,11 @@
 'use client'
 
-import { formatPrice, type PriceAmount, type Locale } from '@/lib/pricing'
+import { formatPrice, type PriceAmount } from '@/lib/pricing'
+import { type LocaleSlug } from '@/lib/locales'
 import { useLocale } from '@/lib/useLocale'
 
 interface PriceLabelProps {
-  prices: Record<Locale, PriceAmount>
+  prices: Record<LocaleSlug, PriceAmount>
   prefix?: 'from' | null
 }
 

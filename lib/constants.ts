@@ -52,11 +52,12 @@ export const NAV_LINKS = [
   { label: 'Contact', href: '/contact' },
 ]
 
+// Service slugs for footer links — Nav/Footer prepend the current locale.
 export const FOOTER_SERVICE_LINKS = [
-  { label: 'Performance', href: '/services#performance' },
-  { label: 'Lead Nurture & CRM', href: '/services#lead-nurture-crm' },
-  { label: 'Organic Social Media', href: '/services#organic-social-media' },
-  { label: 'Landing Page Builds', href: '/services#landing-page-build' },
+  { label: 'Performance', path: '/services#performance' },
+  { label: 'Lead Nurture & CRM', path: '/services#lead-nurture-crm' },
+  { label: 'Organic Social Media', path: '/services#organic-social-media' },
+  { label: 'Landing Page Builds', path: '/services#landing-page-build' },
 ]
 
 export const FACILITY_TYPES = [

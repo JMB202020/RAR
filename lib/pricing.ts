@@ -1,12 +1,15 @@
 // lib/pricing.ts
 // Single source of truth for all service pricing on the site.
 // Access via the useLocale() hook + formatPrice() helper so currency can
-// switch later without hunting through components.
+// switch by region without hunting through components.
+//
+// IMPORTANT: prices below are rough psychological-pricing equivalents of
+// the GBP base rate. Validate with the founder before launch in each market.
 
-export type Locale = 'en-GB' | 'en-US'
+import { LOCALES, type LocaleSlug, getLocale } from './locales'
 
 export type PriceAmount = {
-  // Minor units (pence, cents) so we don't hit floating-point rounding.
+  // Minor units (pence, cents, etc.) so we don't hit floating-point rounding.
   // e.g. £495 => 49500
   minor: number
   // 'monthly' | 'one-off' | null (null means "no suffix, just the number")
@@ -15,18 +18,26 @@ export type PriceAmount = {
 
 export type ServicePricing = {
   slug: string
-  label: string // short marketing name, e.g. 'Performance'
-  tagline: string // one-line summary
-  prefix?: 'from' | null // prepend "From" to price display
-  prices: Record<Locale, PriceAmount>
+  label: string
+  tagline: string
+  prefix?: 'from' | null
+  prices: Record<LocaleSlug, PriceAmount>
 }
 
-export const LOCALE_CURRENCY: Record<Locale, { code: string; symbol: string }> = {
-  'en-GB': { code: 'GBP', symbol: '£' },
-  'en-US': { code: 'USD', symbol: '$' },
+/**
+ * Helper: build a per-locale price record from a single base figure for
+ * each locale. Saves repeating cadence on every line.
+ */
+function priced(
+  cadence: PriceAmount['cadence'],
+  perLocale: Record<LocaleSlug, number>,
+): Record<LocaleSlug, PriceAmount> {
+  const out = {} as Record<LocaleSlug, PriceAmount>
+  for (const slug of Object.keys(perLocale) as LocaleSlug[]) {
+    out[slug] = { minor: perLocale[slug] * 100, cadence }
+  }
+  return out
 }
-
-export const DEFAULT_LOCALE: Locale = 'en-GB'
 
 /**
  * Core package — the only service most clients need.
@@ -46,19 +57,29 @@ export const CORE_PACKAGE = {
   bestFor:
     'Independent gyms, boutique studios, CrossFit boxes, Hyrox facilities',
   prefix: 'from' as const,
-  prices: {
-    'en-GB': { minor: 49500, cadence: 'monthly' as const },
-    'en-US': { minor: 59500, cadence: 'monthly' as const }, // TODO: confirm US pricing
-  },
-  adSpend: {
-    'en-GB': { minor: 50000, cadence: 'monthly' as const },
-    'en-US': { minor: 60000, cadence: 'monthly' as const },
-  },
+  prices: priced('monthly', {
+    'en-gb': 495,
+    'en-ie': 595,
+    'en-us': 595,
+    'en-au': 895,
+    'en-ca': 795,
+    'en-sg': 795,
+    'en-nz': 995,
+  }),
+  adSpend: priced('monthly', {
+    'en-gb': 500,
+    'en-ie': 600,
+    'en-us': 600,
+    'en-au': 900,
+    'en-ca': 800,
+    'en-sg': 800,
+    'en-nz': 1000,
+  }),
 } satisfies ServicePricing & {
   description: string
   includes: string[]
   bestFor: string
-  adSpend: Record<Locale, PriceAmount>
+  adSpend: Record<LocaleSlug, PriceAmount>
 }
 
 export const ADDON_SERVICES = [
@@ -77,10 +98,15 @@ export const ADDON_SERVICES = [
     ],
     bestFor: 'Gyms generating leads but not converting enough into members',
     prefix: null,
-    prices: {
-      'en-GB': { minor: 129500, cadence: 'monthly' as const },
-      'en-US': { minor: 155000, cadence: 'monthly' as const },
-    },
+    prices: priced('monthly', {
+      'en-gb': 1295,
+      'en-ie': 1495,
+      'en-us': 1495,
+      'en-au': 2295,
+      'en-ca': 1995,
+      'en-sg': 1995,
+      'en-nz': 2495,
+    }),
   },
   {
     slug: 'organic-social-media',
@@ -96,10 +122,15 @@ export const ADDON_SERVICES = [
     ],
     bestFor: 'Gyms that want to look active and credible to warm leads',
     prefix: null,
-    prices: {
-      'en-GB': { minor: 34900, cadence: 'monthly' as const },
-      'en-US': { minor: 42000, cadence: 'monthly' as const },
-    },
+    prices: priced('monthly', {
+      'en-gb': 349,
+      'en-ie': 395,
+      'en-us': 395,
+      'en-au': 595,
+      'en-ca': 525,
+      'en-sg': 525,
+      'en-nz': 649,
+    }),
   },
   {
     slug: 'landing-page-build',
@@ -116,10 +147,15 @@ export const ADDON_SERVICES = [
     ],
     bestFor: 'Any gym starting a new campaign or promoting a specific offer',
     prefix: 'from' as const,
-    prices: {
-      'en-GB': { minor: 49900, cadence: 'one-off' as const },
-      'en-US': { minor: 59900, cadence: 'one-off' as const },
-    },
+    prices: priced('one-off', {
+      'en-gb': 499,
+      'en-ie': 595,
+      'en-us': 595,
+      'en-au': 895,
+      'en-ca': 795,
+      'en-sg': 795,
+      'en-nz': 995,
+    }),
   },
 ] satisfies (ServicePricing & {
   description: string
@@ -128,16 +164,23 @@ export const ADDON_SERVICES = [
 })[]
 
 /**
- * Format a PriceAmount into a display string like "£495/month" or "From £499 one-off".
+ * Format a PriceAmount into a display string like "£495/month" or
+ * "From €499 one-off". Uses Intl.NumberFormat for clean currency rendering
+ * with the right symbol per locale.
  */
 export function formatPrice(
   amount: PriceAmount,
-  locale: Locale,
+  locale: LocaleSlug,
   prefix?: 'from' | null,
 ): string {
-  const { symbol } = LOCALE_CURRENCY[locale]
+  const def = getLocale(locale)
   const whole = Math.floor(amount.minor / 100)
-  const formattedNumber = whole.toLocaleString(locale)
+  const formatted = new Intl.NumberFormat(def.intlTag, {
+    style: 'currency',
+    currency: def.currency,
+    maximumFractionDigits: 0,
+  }).format(whole)
+
   const cadenceSuffix =
     amount.cadence === 'monthly'
       ? '/month'
@@ -145,5 +188,15 @@ export function formatPrice(
         ? ' one-off'
         : ''
   const prefixText = prefix === 'from' ? 'From ' : ''
-  return `${prefixText}${symbol}${formattedNumber}${cadenceSuffix}`
+  return `${prefixText}${formatted}${cadenceSuffix}`
 }
+
+/**
+ * Convenience for showing "Prices shown in {currency}" copy.
+ */
+export function currencyForLocale(locale: LocaleSlug): string {
+  return getLocale(locale).currency
+}
+
+// Re-export the locales array so callers don't need two imports.
+export { LOCALES }

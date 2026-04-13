@@ -6,8 +6,10 @@ import {
   CORE_PACKAGE,
   ADDON_SERVICES,
   formatPrice,
+  currencyForLocale,
 } from '@/lib/pricing'
 import { useLocale } from '@/lib/useLocale'
+import { localePath } from '@/lib/locales'
 
 interface PricingCardsProps {
   /** Heading shown above the cards. Page-specific. */
@@ -105,7 +107,7 @@ export default function PricingCards({
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <Link
-            href="/contact"
+            href={localePath(locale, '/contact')}
             className="inline-flex items-center gap-2 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
           >
             Get started <span aria-hidden>&rarr;</span>
@@ -133,7 +135,7 @@ export default function PricingCards({
               {addon.tagline}
             </p>
             <Link
-              href={`/services#${addon.slug}`}
+              href={localePath(locale, `/services#${addon.slug}`)}
               className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
             >
               Learn more <span aria-hidden>&rarr;</span>
@@ -144,7 +146,7 @@ export default function PricingCards({
 
       <p className="mt-8 text-[13px] leading-[1.6] text-brand-tertiary">
         All add-ons require the Performance package. Prices shown in{' '}
-        {locale === 'en-GB' ? 'GBP' : 'USD'}.
+        {currencyForLocale(locale)}.
       </p>
     </div>
   )

@@ -5,11 +5,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { NAV_LINKS } from '@/lib/constants'
+import {
+  DEFAULT_LOCALE,
+  extractLocale,
+  localePath,
+} from '@/lib/locales'
+import LocalePicker from './LocalePicker'
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const pathname = usePathname()
+  const pathname = usePathname() ?? '/'
+  const locale = extractLocale(pathname) ?? DEFAULT_LOCALE
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -31,6 +38,9 @@ export default function Nav() {
     setMobileOpen(false)
   }, [pathname])
 
+  const homeHref = localePath(locale, '/')
+  const contactHref = localePath(locale, '/contact')
+
   return (
     <header
       className={`fixed top-0 right-0 left-0 z-40 transition-all duration-200 ${
@@ -41,7 +51,7 @@ export default function Nav() {
     >
       <nav className="mx-auto flex max-w-[1160px] items-center justify-between px-6 py-5 lg:px-20">
         <Link
-          href="/"
+          href={homeHref}
           aria-label="Rep & Reach — home"
           className="text-[15px] font-semibold tracking-[0.06em] text-brand-primary"
         >
@@ -51,12 +61,12 @@ export default function Nav() {
         {/* Desktop nav */}
         <ul className="hidden items-center gap-9 md:flex">
           {NAV_LINKS.map((link) => {
-            const active =
-              pathname === link.href || pathname.startsWith(link.href + '/')
+            const href = localePath(locale, link.href)
+            const active = pathname === href || pathname.startsWith(href + '/')
             return (
               <li key={link.href}>
                 <Link
-                  href={link.href}
+                  href={href}
                   className={`text-[15px] transition-colors duration-150 ${
                     active
                       ? 'text-brand-primary'
@@ -70,9 +80,10 @@ export default function Nav() {
           })}
         </ul>
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-3 md:flex">
+          <LocalePicker variant="nav" />
           <Link
-            href="/contact"
+            href={contactHref}
             className="inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-5 py-2.5 text-[14px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
           >
             Book a call <span aria-hidden>&rarr;</span>
@@ -94,7 +105,7 @@ export default function Nav() {
         <div className="fixed inset-0 z-50 flex flex-col bg-white md:hidden">
           <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-6 py-5">
             <Link
-              href="/"
+              href={homeHref}
               className="text-[15px] font-semibold tracking-[0.06em] text-brand-primary"
               onClick={() => setMobileOpen(false)}
             >
@@ -110,12 +121,12 @@ export default function Nav() {
           </div>
           <ul className="flex flex-1 flex-col items-start gap-7 px-6 pt-12">
             {NAV_LINKS.map((link) => {
-              const active =
-                pathname === link.href || pathname.startsWith(link.href + '/')
+              const href = localePath(locale, link.href)
+              const active = pathname === href || pathname.startsWith(href + '/')
               return (
                 <li key={link.href}>
                   <Link
-                    href={link.href}
+                    href={href}
                     onClick={() => setMobileOpen(false)}
                     className={`text-[28px] font-medium ${
                       active ? 'text-brand-primary' : 'text-brand-secondary'
@@ -128,12 +139,15 @@ export default function Nav() {
             })}
             <li className="mt-6 w-full">
               <Link
-                href="/contact"
+                href={contactHref}
                 onClick={() => setMobileOpen(false)}
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-[6px] bg-brand-primary py-3.5 text-center text-[15px] font-medium text-brand-inverse"
               >
                 Book a call <span aria-hidden>&rarr;</span>
               </Link>
+            </li>
+            <li className="mt-2">
+              <LocalePicker variant="inline" />
             </li>
           </ul>
         </div>
