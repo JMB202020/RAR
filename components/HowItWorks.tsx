@@ -1,10 +1,25 @@
+import Image from 'next/image'
 import { PROCESS_STEPS } from '@/lib/constants'
 import FadeUp from './FadeUp'
 
 export default function HowItWorks() {
   return (
-    <section className="bg-brand-bg-secondary py-20 md:py-[120px]">
-      <div className="mx-auto max-w-[1160px] px-6 lg:px-20">
+    <section className="relative overflow-hidden bg-brand-bg-secondary py-20 md:py-[120px]">
+      {/* Decorative background image — barely visible behind the content
+          to add subtle texture without competing with the type. */}
+      <div className="pointer-events-none absolute inset-0 -z-0">
+        <Image
+          src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1600&q=80&auto=format&fit=crop"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-[rgba(247,247,245,0.92)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1160px] px-6 lg:px-20">
         <FadeUp>
           <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
             The process

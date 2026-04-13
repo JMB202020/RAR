@@ -56,8 +56,8 @@ export const NAV_LINKS = [
 export const FOOTER_SERVICE_LINKS = [
   { label: 'Performance', path: '/services#performance' },
   { label: 'Lead Nurture & CRM', path: '/services#lead-nurture-crm' },
+  { label: 'Local Search & Reputation', path: '/services#local-search' },
   { label: 'Organic Social Media', path: '/services#organic-social-media' },
-  { label: 'Landing Page Builds', path: '/services#landing-page-build' },
 ]
 
 export const FACILITY_TYPES = [

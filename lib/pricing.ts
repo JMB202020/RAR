@@ -16,6 +16,11 @@ export type PriceAmount = {
   cadence: 'monthly' | 'one-off' | null
 }
 
+export type ServiceImage = {
+  src: string
+  alt: string
+}
+
 export type ServicePricing = {
   slug: string
   label: string
@@ -57,6 +62,10 @@ export const CORE_PACKAGE = {
   bestFor:
     'Independent gyms, boutique studios, CrossFit boxes, Hyrox facilities',
   prefix: 'from' as const,
+  image: {
+    src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=900&q=80&auto=format&fit=crop',
+    alt: 'Ad performance dashboard showing gym campaign results',
+  },
   prices: priced('monthly', {
     'en-gb': 495,
     'en-ie': 595,
@@ -79,6 +88,7 @@ export const CORE_PACKAGE = {
   description: string
   includes: string[]
   bestFor: string
+  image: ServiceImage
   adSpend: Record<LocaleSlug, PriceAmount>
 }
 
@@ -86,18 +96,27 @@ export const ADDON_SERVICES = [
   {
     slug: 'lead-nurture-crm',
     label: 'Lead Nurture & CRM',
-    tagline: 'Email, SMS & full pipeline management.',
+    tagline: 'Email, SMS, WhatsApp & full pipeline management.',
     description:
       'Automated lead nurture sequences, lapsed-member re-engagement, and full CRM setup — so no enquiry ever goes cold.',
     includes: [
       'Email platform setup and sequence build',
       'SMS integration for time-sensitive follow-up',
+      'WhatsApp follow-up sequences (highest open-rate channel)',
       'CRM setup or audit',
       'Lead intake and pipeline tracking',
       'Monthly performance review',
     ],
     bestFor: 'Gyms generating leads but not converting enough into members',
     prefix: null,
+    image: {
+      src: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=900&q=80&auto=format&fit=crop',
+      alt: 'CRM dashboard for managing gym leads',
+    },
+    cardImage: {
+      src: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop',
+      alt: 'Gym staff following up with a lead on their phone',
+    },
     prices: priced('monthly', {
       'en-gb': 1295,
       'en-ie': 1495,
@@ -106,6 +125,43 @@ export const ADDON_SERVICES = [
       'en-ca': 1995,
       'en-sg': 1995,
       'en-nz': 2495,
+    }),
+  },
+  {
+    slug: 'local-search',
+    label: 'Local Search & Reputation',
+    tagline:
+      'Google Business Profile, local rankings, and reputation management.',
+    description:
+      'When someone searches "gym near me", the gyms that appear at the top of Google Maps with strong ratings win the click before any ad is seen. We make sure your gym is found first — and looks the part when they do.',
+    includes: [
+      'Google Business Profile setup and optimisation',
+      'Local citation building and cleanup',
+      'Review request sequences (email + SMS + WhatsApp)',
+      'Review monitoring and response management',
+      'Weekly GBP posts to keep your profile active',
+      'Local ranking tracking across target keywords',
+      'Monthly local search performance report',
+    ],
+    bestFor:
+      'Any gym that wants to dominate local search and build a strong reputation before — or alongside — running paid ads',
+    prefix: null,
+    image: {
+      src: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=900&q=80&auto=format&fit=crop',
+      alt: 'Local search results showing gym listings on Google Maps',
+    },
+    cardImage: {
+      src: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80&auto=format&fit=crop',
+      alt: 'Google Business Profile and local search results on a smartphone',
+    },
+    prices: priced('monthly', {
+      'en-gb': 349,
+      'en-ie': 395,
+      'en-us': 395,
+      'en-au': 595,
+      'en-ca': 525,
+      'en-sg': 525,
+      'en-nz': 649,
     }),
   },
   {
@@ -122,6 +178,14 @@ export const ADDON_SERVICES = [
     ],
     bestFor: 'Gyms that want to look active and credible to warm leads',
     prefix: null,
+    image: {
+      src: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=900&q=80&auto=format&fit=crop',
+      alt: 'Organic social media content for a fitness brand',
+    },
+    cardImage: {
+      src: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80&auto=format&fit=crop',
+      alt: 'Social media content being created for a fitness studio',
+    },
     prices: priced('monthly', {
       'en-gb': 349,
       'en-ie': 395,
@@ -132,35 +196,12 @@ export const ADDON_SERVICES = [
       'en-nz': 649,
     }),
   },
-  {
-    slug: 'landing-page-build',
-    label: 'Landing Page Build',
-    tagline: 'High-converting page built for your campaigns.',
-    description:
-      'One focused page, one goal: get the visitor to enquire. No distractions, no navigation away, no reason to leave.',
-    includes: [
-      'Strategy and wireframe',
-      'Copywriting (offer, headline, body, form)',
-      'Design and development',
-      'Form integration with your CRM',
-      'Delivered within 10 working days',
-    ],
-    bestFor: 'Any gym starting a new campaign or promoting a specific offer',
-    prefix: 'from' as const,
-    prices: priced('one-off', {
-      'en-gb': 499,
-      'en-ie': 595,
-      'en-us': 595,
-      'en-au': 895,
-      'en-ca': 795,
-      'en-sg': 795,
-      'en-nz': 995,
-    }),
-  },
 ] satisfies (ServicePricing & {
   description: string
   includes: string[]
   bestFor: string
+  image: ServiceImage
+  cardImage: ServiceImage
 })[]
 
 /**

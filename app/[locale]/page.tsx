@@ -40,13 +40,8 @@ export default async function HomePage({ params }: PageProps) {
       <PlatformsStrip />
       <section className="bg-brand-bg-secondary py-20 md:py-[120px]">
         <PricingCards
-          heading={
-            <>
-              Simple, transparent pricing.
-              <br />
-              One core package. Add what you need.
-            </>
-          }
+          heading="One core package. Add what you need."
+          description={null}
         />
       </section>
       <WhoWeWorkWith />

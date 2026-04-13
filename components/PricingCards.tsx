@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Check } from 'lucide-react'
 import {
   CORE_PACKAGE,
@@ -120,26 +121,37 @@ export default function PricingCards({
         {ADDON_SERVICES.map((addon) => (
           <div
             key={addon.slug}
-            className="flex flex-col rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white p-7"
+            className="flex flex-col overflow-hidden rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white"
           >
-            <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
-              Add-on
-            </p>
-            <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
-              {addon.label}
-            </h3>
-            <p className="mt-3 font-[family-name:var(--font-mono)] text-[18px] font-medium text-brand-primary tabular">
-              {formatPrice(addon.prices[locale], locale, addon.prefix)}
-            </p>
-            <p className="mt-4 flex-1 text-[14px] leading-[1.65] text-brand-secondary">
-              {addon.tagline}
-            </p>
-            <Link
-              href={localePath(locale, `/services#${addon.slug}`)}
-              className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
-            >
-              Learn more <span aria-hidden>&rarr;</span>
-            </Link>
+            <div className="relative aspect-[16/10] w-full bg-brand-bg-secondary">
+              <Image
+                src={addon.cardImage.src}
+                alt={addon.cardImage.alt}
+                fill
+                sizes="(min-width: 1024px) 360px, (min-width: 768px) 33vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="flex flex-1 flex-col p-7">
+              <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                Add-on
+              </p>
+              <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
+                {addon.label}
+              </h3>
+              <p className="mt-3 font-[family-name:var(--font-mono)] text-[18px] font-medium text-brand-primary tabular">
+                {formatPrice(addon.prices[locale], locale, addon.prefix)}
+              </p>
+              <p className="mt-4 flex-1 text-[14px] leading-[1.65] text-brand-secondary">
+                {addon.tagline}
+              </p>
+              <Link
+                href={localePath(locale, `/services#${addon.slug}`)}
+                className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
+              >
+                Learn more <span aria-hidden>&rarr;</span>
+              </Link>
+            </div>
           </div>
         ))}
       </div>

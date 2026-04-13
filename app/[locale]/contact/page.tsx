@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Check } from 'lucide-react'
 import Hero from '@/components/Hero'
@@ -52,6 +53,18 @@ export default async function ContactPage({ params }: PageProps) {
 
             {/* Right — Trust signals */}
             <div className="flex flex-col gap-12">
+              <FadeUp delay={0.04}>
+                <div className="relative h-[240px] w-full overflow-hidden rounded-[12px] bg-brand-bg-secondary md:h-[280px]">
+                  <Image
+                    src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=1200&q=80&auto=format&fit=crop"
+                    alt="Modern gym facility"
+                    fill
+                    sizes="(min-width: 1024px) 540px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              </FadeUp>
+
               <FadeUp delay={0.08}>
                 <div>
                   <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
