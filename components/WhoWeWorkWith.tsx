@@ -57,7 +57,7 @@ export default function WhoWeWorkWith() {
                 href={localePath(locale, '/contact')}
                 className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] border border-brand-primary px-7 py-3 text-[15px] font-medium text-brand-primary transition-colors duration-150 hover:bg-brand-primary hover:text-brand-inverse"
               >
-                Book a discovery call <span aria-hidden>&rarr;</span>
+                Enquire <span aria-hidden>&rarr;</span>
               </Link>
             </div>
           </FadeUp>

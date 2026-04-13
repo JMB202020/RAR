@@ -23,16 +23,16 @@ export default async function HomePage({ params }: PageProps) {
         eyebrow="Performance marketing for gyms & fitness studios"
         heading={
           <>
-            We fill gyms.
+            We fill gyms,
             <br />
-            That&apos;s all we do.
+            all over the globe.
           </>
         }
         body="Meta and Google ads built exclusively for gyms and fitness studios. More enquiries. More members. Less guesswork."
         pricingNote={<HeroPricingNote />}
         ctas={[
           { label: 'See our services', path: '/services', variant: 'primary' },
-          { label: 'Book a free call', path: '/contact', variant: 'secondary' },
+          { label: 'Enquire', path: '/contact', variant: 'secondary' },
         ]}
         fullHeight
         withVisual

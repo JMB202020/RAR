@@ -32,14 +32,15 @@ export default function ResultsGrid() {
               days of launch.
             </p>
             <p className="mt-5 text-[17px] leading-[1.75] text-brand-secondary">
-              In the meantime, book a call to hear directly about our approach
-              and what results you can expect.
+              In the meantime, send us a few details about your gym and
+              we&apos;ll be in touch with our approach and what results you
+              can expect.
             </p>
             <Link
               href={localePath(locale, '/contact')}
               className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
             >
-              Book a discovery call <span aria-hidden>&rarr;</span>
+              Send an enquiry <span aria-hidden>&rarr;</span>
             </Link>
           </div>
         </FadeUp>

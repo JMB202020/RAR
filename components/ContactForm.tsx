@@ -234,7 +234,7 @@ export default function ContactForm() {
         disabled={isSubmitting}
         className="inline-flex items-center justify-center gap-1.5 self-start rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80 disabled:opacity-50"
       >
-        {isSubmitting ? 'Submitting…' : 'Book a discovery call'}{' '}
+        {isSubmitting ? 'Submitting…' : 'Send enquiry'}{' '}
         <span aria-hidden>&rarr;</span>
       </button>
 

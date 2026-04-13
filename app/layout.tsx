@@ -19,11 +19,11 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Rep & Reach — Performance Marketing for Gyms & Fitness Studios",
   description:
-    "Meta ads, Google ads, and lead generation exclusively for gyms, CrossFit boxes, boutique studios, and Hyrox facilities. We fill gyms. That's all we do.",
+    "Meta ads, Google ads, and lead generation exclusively for gyms, CrossFit boxes, boutique studios, and Hyrox facilities. We fill gyms, all over the globe.",
   openGraph: {
     title: "Rep & Reach — Performance Marketing for Gyms & Fitness Studios",
     description:
-      "Meta ads, Google ads, and lead generation exclusively for gyms, CrossFit boxes, boutique studios, and Hyrox facilities. We fill gyms. That's all we do.",
+      "Meta ads, Google ads, and lead generation exclusively for gyms, CrossFit boxes, boutique studios, and Hyrox facilities. We fill gyms, all over the globe.",
     type: 'website',
     url: 'https://repandreach.com',
     // TODO: Add OG image when available

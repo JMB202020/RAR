@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Hero from '@/components/Hero'
 import SegmentSection from '@/components/SegmentSection'
+import BrandMarquee from '@/components/BrandMarquee'
 import CTABar from '@/components/CTABar'
 import { isLocale } from '@/lib/locales'
 
@@ -134,6 +135,8 @@ export default async function WhoWeWorkWithPage({ params }: PageProps) {
           priority
         />
       </div>
+
+      <BrandMarquee />
 
       {SEGMENTS.map((segment, i) => (
         <SegmentSection

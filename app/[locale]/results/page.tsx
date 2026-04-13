@@ -83,7 +83,7 @@ export default async function ResultsPage({ params }: PageProps) {
                 href={localePath(locale, '/contact')}
                 className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
               >
-                Book a discovery call <span aria-hidden>&rarr;</span>
+                Send an enquiry <span aria-hidden>&rarr;</span>
               </Link>
             </div>
           </FadeUp>

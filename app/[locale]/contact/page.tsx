@@ -9,23 +9,23 @@ import { TARGET_SEGMENTS } from '@/lib/constants'
 import { isLocale } from '@/lib/locales'
 
 export const metadata: Metadata = {
-  title: 'Book a Discovery Call — Rep & Reach',
+  title: 'Enquire — Rep & Reach',
   description:
-    "Book a free 20-minute discovery call with Rep & Reach. No commitment. No hard sell. Just an honest conversation about your gym's growth.",
+    "Send Rep & Reach a few details about your gym. We'll be in touch within one business day to arrange a call.",
   openGraph: {
-    title: 'Book a Discovery Call — Rep & Reach',
+    title: 'Enquire — Rep & Reach',
     description:
-      "Book a free 20-minute discovery call with Rep & Reach. No commitment. No hard sell. Just an honest conversation about your gym's growth.",
+      "Send Rep & Reach a few details about your gym. We'll be in touch within one business day to arrange a call.",
     type: 'website',
     url: 'https://repandreach.com/contact',
   },
 }
 
 const EXPECTATIONS = [
-  'A 20-minute call, not a sales pitch',
+  'A reply within one business day',
   'An honest view of whether we can help',
+  "A call once we've reviewed your details",
   'No obligation to proceed',
-  'Response within one business day',
 ]
 
 interface PageProps {
@@ -40,7 +40,7 @@ export default async function ContactPage({ params }: PageProps) {
       <Hero
         eyebrow="Get in touch"
         heading="Let's talk."
-        body="Book a free 20-minute discovery call. We'll learn about your gym, understand your goals, and tell you honestly whether we can help."
+        body="Send us a few details about your gym. We'll be in touch within one business day to arrange a call."
       />
 
       <section className="pb-20 md:pb-[120px]">

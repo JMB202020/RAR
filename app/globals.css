@@ -63,6 +63,40 @@ body.nav-open {
   font-variant-numeric: tabular-nums;
 }
 
+/* Brand marquee — slow horizontal scroll for the gym-brand strip on
+   /who-we-work-with. The component duplicates its children, so a -50%
+   translate gives a perfectly seamless loop. */
+@keyframes brand-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.brand-marquee {
+  animation: brand-marquee 70s linear infinite;
+  width: max-content;
+}
+.brand-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Soft fade at both edges so brands enter and leave gracefully instead of
+   hard-cutting at the viewport edge. */
+.marquee-fade {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+}
+
 /* Reduce motion respect */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
