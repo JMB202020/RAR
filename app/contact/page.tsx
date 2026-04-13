@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Hero from '@/components/Hero'
 import ContactForm from '@/components/ContactForm'
 import FadeUp from '@/components/FadeUp'
-import { Check } from 'lucide-react'
 import { TARGET_SEGMENTS } from '@/lib/constants'
 
 export const metadata: Metadata = {
@@ -32,30 +31,34 @@ export default function ContactPage() {
         eyebrow="Get in touch"
         heading="Let's talk."
         body="Book a free 20-minute discovery call. We'll learn about your gym, understand your goals, and tell you honestly whether we can help."
+        index="04"
       />
 
-      <section className="pb-24">
-        <div className="mx-auto max-w-[1200px] px-6 lg:px-16">
-          <div className="grid gap-16 md:grid-cols-2">
+      <section className="pb-28">
+        <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+          <div className="grid gap-16 md:grid-cols-12">
             {/* Left — Form */}
-            <FadeUp>
+            <FadeUp className="md:col-span-12 lg:col-span-7">
               <ContactForm />
             </FadeUp>
 
             {/* Right — Trust signals */}
-            <div className="flex flex-col gap-12">
+            <div className="flex flex-col gap-12 md:col-span-12 lg:col-span-4 lg:col-start-9">
               <FadeUp delay={0.08}>
-                <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                <div className="border border-[var(--color-border-light)] bg-brand-bg-secondary p-8">
+                  <p className="flex items-center gap-3 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.18em] text-brand-tertiary">
+                    <span className="block h-px w-6 bg-brand-accent" />
                     What to expect
                   </p>
-                  <ul className="mt-6 flex flex-col gap-4">
-                    {EXPECTATIONS.map((item) => (
+                  <ul className="mt-6 flex flex-col gap-3.5">
+                    {EXPECTATIONS.map((item, i) => (
                       <li
                         key={item}
-                        className="flex items-center gap-3 text-[15px] text-brand-secondary"
+                        className="flex items-baseline gap-3 text-[15px] leading-[1.55] text-brand-secondary"
                       >
-                        <Check size={18} className="shrink-0 text-brand-primary" />
+                        <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.12em] text-brand-accent tabular">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
                         {item}
                       </li>
                     ))}
@@ -65,19 +68,20 @@ export default function ContactPage() {
 
               <FadeUp delay={0.16}>
                 <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                  <p className="flex items-center gap-3 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.18em] text-brand-tertiary">
+                    <span className="block h-px w-6 bg-brand-accent" />
                     Who we work with
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-5 flex flex-wrap gap-2">
                     {TARGET_SEGMENTS.slice(0, 5).map((segment) => (
                       <span
                         key={segment}
-                        className="rounded-full border border-[var(--color-border-medium)] px-3 py-1.5 text-[13px] text-brand-secondary"
+                        className="border border-[var(--color-border-medium)] px-3 py-1.5 text-[13px] text-brand-secondary"
                       >
                         {segment}
                       </span>
                     ))}
-                    <span className="rounded-full border border-[var(--color-border-medium)] px-3 py-1.5 text-[13px] text-brand-tertiary">
+                    <span className="border border-dashed border-[var(--color-border-medium)] px-3 py-1.5 text-[13px] text-brand-tertiary">
                       and more
                     </span>
                   </div>
@@ -86,7 +90,8 @@ export default function ContactPage() {
 
               <FadeUp delay={0.24}>
                 <div>
-                  <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                  <p className="flex items-center gap-3 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.18em] text-brand-tertiary">
+                    <span className="block h-px w-6 bg-brand-accent" />
                     Based in
                   </p>
                   <p className="mt-4 text-[15px] leading-[1.7] text-brand-secondary">

@@ -56,36 +56,41 @@ export default function ContactForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-start">
-        <CheckCircle size={48} className="text-brand-primary" />
-        <h3 className="mt-6 text-[22px] font-medium leading-[1.3] text-brand-primary">
-          We&apos;ll be in touch soon.
+        <CheckCircle size={48} className="text-brand-accent" />
+        <h3 className="mt-6 font-[family-name:var(--font-display)] text-[32px] leading-[1.1] text-brand-primary">
+          We&apos;ll be in touch <em className="italic text-brand-accent">soon.</em>
         </h3>
-        <p className="mt-3 text-[16px] leading-[1.7] text-brand-secondary">
+        <p className="mt-4 text-[16px] leading-[1.7] text-brand-secondary">
           Thanks for reaching out. We&apos;ll get back to you within one business
           day to arrange a call.
         </p>
-        <p className="mt-4 text-[14px] text-brand-tertiary">
+        <p className="mt-3 text-[14px] text-brand-tertiary">
           In the meantime, feel free to browse our services.
         </p>
         <Link
           href="/services"
-          className="mt-6 text-[15px] text-brand-secondary underline-offset-4 transition-colors duration-150 hover:text-brand-primary hover:underline"
+          className="group mt-8 inline-flex items-center gap-2 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.16em] text-brand-secondary"
         >
-          &larr; Back to services
+          <span className="text-brand-accent transition-transform duration-200 group-hover:-translate-x-0.5">
+            &#x2196;
+          </span>
+          <span className="link-underline">Back to services</span>
         </Link>
       </div>
     )
   }
 
   const inputClasses =
-    'w-full rounded-[6px] border border-[var(--color-border-medium)] bg-white px-4 py-3 text-[15px] text-brand-primary placeholder:text-brand-tertiary outline-none transition-colors duration-150 focus:border-brand-primary'
-  const errorClasses = 'mt-1.5 text-[13px] text-red-600'
-  const labelClasses = 'block text-[14px] font-medium text-brand-primary mb-2'
+    'w-full appearance-none border border-[var(--color-border-medium)] bg-brand-bg-secondary px-4 py-3.5 text-[15px] text-brand-primary placeholder:text-brand-tertiary outline-none transition-colors duration-150 focus:border-brand-accent focus:bg-brand-bg-elevated'
+  const errorClasses = 'mt-2 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.12em] text-[#FF6E6E]'
+  const labelClasses = 'block font-[family-name:var(--font-mono)] text-[10px] font-medium uppercase tracking-[0.18em] text-brand-tertiary mb-2.5'
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-7" noValidate>
       <div>
-        <label className={labelClasses}>Full name *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/01</span> &nbsp; Full name *
+        </label>
         <input
           type="text"
           className={inputClasses}
@@ -96,7 +101,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Email address *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/02</span> &nbsp; Email address *
+        </label>
         <input
           type="email"
           className={inputClasses}
@@ -113,7 +120,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Business name *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/03</span> &nbsp; Business name *
+        </label>
         <input
           type="text"
           className={inputClasses}
@@ -124,7 +133,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Type of facility *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/04</span> &nbsp; Type of facility *
+        </label>
         <select
           className={inputClasses}
           defaultValue=""
@@ -145,7 +156,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Country *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/05</span> &nbsp; Country *
+        </label>
         <select
           className={inputClasses}
           defaultValue=""
@@ -164,7 +177,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Monthly ad budget *</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/06</span> &nbsp; Monthly ad budget *
+        </label>
         <select
           className={inputClasses}
           defaultValue=""
@@ -183,7 +198,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>How did you hear about us?</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/07</span> &nbsp; How did you hear about us?
+        </label>
         <select className={inputClasses} defaultValue="" {...register('referral')}>
           <option value="" disabled>
             Select an option
@@ -197,7 +214,9 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className={labelClasses}>Message</label>
+        <label className={labelClasses}>
+          <span className="text-brand-accent">/08</span> &nbsp; Message
+        </label>
         <textarea
           rows={4}
           className={inputClasses}
@@ -207,20 +226,24 @@ export default function ContactForm() {
       </div>
 
       {submitError && (
-        <p className="text-[14px] text-red-600">{submitError}</p>
+        <p className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.12em] text-[#FF6E6E]">
+          {submitError}
+        </p>
       )}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-85 disabled:opacity-50"
+        className="group mt-2 inline-flex items-center justify-center gap-2 self-start bg-brand-accent px-8 py-4 font-[family-name:var(--font-mono)] text-[11px] font-medium uppercase tracking-[0.16em] text-brand-accent-text transition-all duration-200 hover:bg-[#E5FF40] disabled:opacity-50"
       >
-        {isSubmitting ? 'Submitting...' : 'Book a discovery call \u2192'}
+        {isSubmitting ? 'Submitting…' : 'Book a discovery call'}
+        <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">
+          &#x2198;
+        </span>
       </button>
 
-      <p className="text-[13px] leading-[1.6] text-brand-tertiary">
-        No hard sell. No long contracts. We&apos;ll get back to you within one
-        business day.
+      <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.16em] text-brand-tertiary">
+        <span className="live-dot mr-2" /> No hard sell. Replies within 1 business day.
       </p>
     </form>
   )
