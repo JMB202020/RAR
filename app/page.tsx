@@ -1,33 +1,45 @@
 import Hero from '@/components/Hero'
-import ScrollIndicator from '@/components/ScrollIndicator'
-import StatsBar from '@/components/StatsBar'
-import ServicesGrid from '@/components/ServicesGrid'
+import PricingCards from '@/components/PricingCards'
 import WhoWeWorkWith from '@/components/WhoWeWorkWith'
 import HowItWorks from '@/components/HowItWorks'
 import ResultsGrid from '@/components/ResultsGrid'
-import TrustStrip from '@/components/TrustStrip'
 import CTABar from '@/components/CTABar'
 
 export default function HomePage() {
   return (
     <>
       <Hero
-        eyebrow="Performance marketing for fitness businesses"
-        heading="We fill gyms. That's all we do."
-        body="Meta and Google ads built exclusively for gyms, studios, and fitness facilities. More membership enquiries. More trial sign-ups. Less guesswork."
+        eyebrow="Performance marketing for gyms & fitness studios"
+        heading={
+          <>
+            We fill gyms.
+            <br />
+            That&apos;s all we do.
+          </>
+        }
+        body="Meta and Google ads built exclusively for gyms and fitness studios. More enquiries. More members. Less guesswork."
+        pricingNote="From £495/month · Recommended ad spend £500/month"
         ctas={[
-          { label: 'See how it works', href: '/services', variant: 'primary' },
-          { label: 'View results', href: '/results', variant: 'text' },
+          { label: 'See our services', href: '/services', variant: 'primary' },
+          { label: 'Book a free call', href: '/contact', variant: 'secondary' },
         ]}
         fullHeight
+        withStats
       />
-      <ScrollIndicator />
-      <StatsBar />
-      <ServicesGrid />
+      <section className="bg-brand-bg-secondary py-20 md:py-[120px]">
+        <PricingCards
+          heading={
+            <>
+              Simple, transparent pricing.
+              <br />
+              One core package. Add what you need.
+            </>
+          }
+        />
+      </section>
       <WhoWeWorkWith />
       <HowItWorks />
       <ResultsGrid />
-      <TrustStrip />
       <CTABar />
     </>
   )

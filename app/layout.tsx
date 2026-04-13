@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
-import UtilityBar from '@/components/UtilityBar'
 import './globals.css'
 
 const geist = localFont({
@@ -32,8 +31,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0A0A0A',
-  colorScheme: 'dark',
+  themeColor: '#FFFFFF',
+  colorScheme: 'light',
 }
 
 export default function RootLayout({
@@ -57,11 +56,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="relative flex min-h-screen flex-col bg-brand-bg text-brand-primary">
-        <div className="grain" aria-hidden />
-        <UtilityBar />
+      <body className="flex min-h-screen flex-col bg-brand-bg text-brand-primary">
         <Nav />
-        <main className="relative z-10 flex-1">{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>

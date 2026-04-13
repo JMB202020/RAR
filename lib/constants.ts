@@ -1,75 +1,14 @@
 // lib/constants.ts
-// Update these values as real data becomes available
+// Update these values as real data becomes available.
+// Service pricing lives in lib/pricing.ts — don't duplicate it here.
 
 export const STATS = [
-  { value: '£4.20', label: 'Average cost per lead' },
-  { value: '3.8×', label: 'Average return on ad spend' },
-  { value: '48h', label: 'Average time to first lead' },
-  { value: '100%', label: 'Fitness clients. No exceptions.' },
+  { value: '£4.20', label: 'cost per lead' },
+  { value: '3.8×', label: 'return on ad spend' },
+  { value: '48h', label: 'first lead' },
+  { value: '100%', label: 'fitness clients' },
 ]
 // TODO: Replace with real figures from first client campaigns
-
-export const SERVICES_CORE = [
-  {
-    number: '01',
-    name: 'Meta Ads',
-    slug: 'meta-ads',
-    description:
-      'Paid social campaigns on Facebook and Instagram that generate membership enquiries and trial sign-ups at scale.',
-  },
-  {
-    number: '02',
-    name: 'Google Ads & YouTube',
-    slug: 'google-ads',
-    description:
-      'Search campaigns for high-intent prospects, plus YouTube pre-roll to keep your facility front of mind.',
-  },
-  {
-    number: '03',
-    name: 'Remarketing',
-    slug: 'remarketing',
-    description:
-      'Follow-up campaigns that re-engage warm leads across Meta and Google. Usually the highest-return activity in your account.',
-  },
-]
-
-export const SERVICES_ADDONS = [
-  {
-    number: '04',
-    name: 'Email & SMS Marketing',
-    slug: 'email-sms',
-    description:
-      'Automated sequences that nurture leads, re-engage lapsed members, and drive referrals.',
-  },
-  {
-    number: '05',
-    name: 'Organic Social Media',
-    slug: 'social-media',
-    description:
-      'Consistent, on-brand content for Instagram and Facebook.',
-  },
-  {
-    number: '06',
-    name: 'Landing Page Builds',
-    slug: 'landing-pages',
-    description:
-      'Dedicated, high-converting landing pages for your ad campaigns.',
-  },
-  {
-    number: '07',
-    name: 'Offer & Funnel Strategy',
-    slug: 'funnel-strategy',
-    description:
-      'Build a compelling membership offer, lead magnet, and follow-up funnel.',
-  },
-  {
-    number: '08',
-    name: 'CRM & Lead Management',
-    slug: 'crm',
-    description:
-      'Take over your CRM and ensure every lead is followed up, fast.',
-  },
-]
 
 export const TARGET_SEGMENTS = [
   'Independent gyms',
@@ -77,11 +16,9 @@ export const TARGET_SEGMENTS = [
   'CrossFit boxes',
   'Hyrox facilities',
   'Franchise gyms',
-  'Pilates & yoga studios',
   'Boxing gyms',
+  'Pilates & yoga',
   'Cycling studios',
-  'HIIT studios',
-  'Personal training studios',
 ]
 
 export const PROCESS_STEPS = [
@@ -89,35 +26,23 @@ export const PROCESS_STEPS = [
     number: '01',
     title: 'Discovery call',
     description:
-      "We learn about your gym, your current marketing, and your goals. We'll tell you honestly whether we can help.",
+      'We learn about your gym and goals. Honest advice from the start.',
   },
   {
     number: '02',
     title: 'Campaign build',
-    description:
-      'We build and launch your Meta and Google campaigns. Most clients go live within 5 working days.',
+    description: 'We go live within 5 working days.',
   },
   {
     number: '03',
-    title: 'Leads start flowing',
-    description:
-      "Most clients see their first enquiries within 48 hours of launch. We'll notify you as leads come in.",
+    title: 'Leads flowing',
+    description: 'Most clients see leads within 48h of launch.',
   },
   {
     number: '04',
-    title: 'Ongoing optimisation',
-    description:
-      'We monitor, test, and improve every month. Monthly reporting keeps you across performance.',
+    title: 'Optimisation',
+    description: 'Monthly reporting and continuous improvement.',
   },
-]
-
-export const TRUST_REGIONS = [
-  { flag: '🇬🇧', name: 'United Kingdom' },
-  { flag: '🇺🇸', name: 'United States' },
-  { flag: '🇦🇺', name: 'Australia' },
-  { flag: '🇨🇦', name: 'Canada' },
-  { flag: '🇮🇪', name: 'Ireland' },
-  { flag: '🇳🇿', name: 'New Zealand' },
 ]
 
 export const NAV_LINKS = [
@@ -128,14 +53,10 @@ export const NAV_LINKS = [
 ]
 
 export const FOOTER_SERVICE_LINKS = [
-  { label: 'Meta Ads', href: '/services/meta-ads' },
-  { label: 'Google Ads & YouTube', href: '/services/google-ads' },
-  { label: 'Remarketing', href: '/services/remarketing' },
-  { label: 'Email & SMS', href: '/services/email-sms' },
-  { label: 'Social Media', href: '/services/social-media' },
-  { label: 'Landing Pages', href: '/services/landing-pages' },
-  { label: 'Funnel Strategy', href: '/services/funnel-strategy' },
-  { label: 'CRM Management', href: '/services/crm' },
+  { label: 'Performance', href: '/services#performance' },
+  { label: 'Lead Nurture & CRM', href: '/services#lead-nurture-crm' },
+  { label: 'Organic Social Media', href: '/services#organic-social-media' },
+  { label: 'Landing Page Builds', href: '/services#landing-page-build' },
 ]
 
 export const FACILITY_TYPES = [
@@ -160,10 +81,10 @@ export const COUNTRIES = [
 ]
 
 export const AD_BUDGETS = [
-  'Less than $500 / month',
-  '$500 – $1,000 / month',
-  '$1,000 – $2,500 / month',
-  '$2,500+ / month',
+  'Less than £500 / month',
+  '£500 – £1,000 / month',
+  '£1,000 – £2,500 / month',
+  '£2,500+ / month',
   'Not currently running ads',
 ]
 

@@ -1,41 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  /* Electric Pulse — deep charcoal with electric lime accent */
-  --color-bg: #0A0A0A;
-  --color-bg-secondary: #141414;
-  --color-bg-elevated: #1B1B1B;
-  --color-bg-dark: #000000;
-  --color-text-primary: #F5F5F5;
-  --color-text-secondary: #9A9A9A;
-  --color-text-tertiary: #5E5E5E;
-  --color-text-inverse: #F5F5F5;
-  --color-accent: #D4FF00;
-  --color-accent-soft: rgba(212, 255, 0, 0.14);
-  --color-accent-text: #0A0A0A;
-  --color-border-light: rgba(255, 255, 255, 0.08);
-  --color-border-medium: rgba(255, 255, 255, 0.18);
-  --color-border-dark: rgba(255, 255, 255, 0.30);
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F7F7F5;
+  --color-bg-dark: #0A0A0A;
+  --color-text-primary: #0A0A0A;
+  --color-text-secondary: #6B6B6B;
+  --color-text-tertiary: #9E9E9E;
+  --color-text-inverse: #FFFFFF;
+  --color-border-light: rgba(0, 0, 0, 0.08);
+  --color-border-medium: rgba(0, 0, 0, 0.15);
+  --color-border-dark: rgba(0, 0, 0, 0.30);
 
-  /* RGB triplet for the body background, used for translucent overlays */
-  --color-bg-rgb: 10, 10, 10;
+  /* Accent is only used by the themed preview on /styles.
+     Neutral defaults here; ThemedPreview overrides these in a scoped wrapper. */
+  --color-accent: #0A0A0A;
+  --color-accent-text: #FFFFFF;
 }
 
 @theme inline {
   --color-brand-bg: var(--color-bg);
   --color-brand-bg-secondary: var(--color-bg-secondary);
-  --color-brand-bg-elevated: var(--color-bg-elevated);
   --color-brand-bg-dark: var(--color-bg-dark);
   --color-brand-primary: var(--color-text-primary);
   --color-brand-secondary: var(--color-text-secondary);
   --color-brand-tertiary: var(--color-text-tertiary);
   --color-brand-inverse: var(--color-text-inverse);
-  --color-brand-accent: var(--color-accent);
-  --color-brand-accent-soft: var(--color-accent-soft);
-  --color-brand-accent-text: var(--color-accent-text);
   --color-brand-border-light: var(--color-border-light);
   --color-brand-border-medium: var(--color-border-medium);
   --color-brand-border-dark: var(--color-border-dark);
+
+  --color-brand-accent: var(--color-accent);
+  --color-brand-accent-text: var(--color-accent-text);
 
   /* Instrument Serif loaded via Google Fonts link in layout.tsx head.
      Fallback to Georgia if unavailable (e.g. offline builds).
@@ -47,7 +43,6 @@
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-bg);
 }
 
 body {
@@ -56,30 +51,6 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss01", "ss02", "cv11";
-}
-
-/* Custom selection — lime on charcoal */
-::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-text);
-}
-
-/* Subtle dark scrollbar */
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.10);
-  border: 3px solid var(--color-bg);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.20);
 }
 
 /* Lock body scroll when mobile nav is open */
@@ -87,82 +58,7 @@ body.nav-open {
   overflow: hidden;
 }
 
-/* Film-grain overlay layer — sits above the page, below interactive content,
-   gives the site that 'shot on real film' editorial texture instead of the flat
-   plastic feel of generated AI sites. */
-.grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.08;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-size: 200px 200px;
-}
-
-/* Editorial number marker — used as a lime square notch before
-   eyebrow labels and section headings */
-.notch::before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin-right: 10px;
-  background: var(--color-accent);
-  vertical-align: middle;
-  transform: translateY(-1px);
-}
-
-/* Lime accent rule — used as a section divider */
-.accent-rule {
-  display: inline-block;
-  width: 32px;
-  height: 1px;
-  background: var(--color-accent);
-  vertical-align: middle;
-  margin-right: 12px;
-}
-
-/* Pulsing live dot — used in the 'now booking' utility bar */
-.live-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: var(--color-accent);
-  border-radius: 999px;
-  box-shadow: 0 0 0 0 rgba(212, 255, 0, 0.6);
-  animation: pulse 2.4s infinite;
-}
-@keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(212, 255, 0, 0.55); }
-  70%  { box-shadow: 0 0 0 7px rgba(212, 255, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(212, 255, 0, 0); }
-}
-
-/* Underline that draws in on hover — used on link CTAs */
-.link-underline {
-  background-image: linear-gradient(var(--color-accent), var(--color-accent));
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size 0.35s ease;
-  padding-bottom: 2px;
-}
-.link-underline:hover {
-  background-size: 100% 1px;
-}
-
-/* Diagonal hatch fill — used for empty state placeholders */
-.hatch {
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.04) 0 1px,
-    transparent 1px 10px
-  );
-}
-
-/* Tabular numerals for stats blocks */
+/* Tabular numerals for stats and prices so digits align vertically */
 .tabular {
   font-variant-numeric: tabular-nums;
 }
