@@ -68,8 +68,9 @@ const SEGMENTS = [
       'Built-in referral mechanics',
     ],
     image: {
-      src: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1000&q=80&auto=format&fit=crop',
-      alt: 'CrossFit box with athletes training',
+      // Barbell loaded with bumper plates on a gym floor — canonical CrossFit.
+      src: 'https://images.unsplash.com/photo-1534368420009-621bfab424a8?w=1000&q=80&auto=format&fit=crop',
+      alt: 'Barbell loaded with bumper plates in a CrossFit box',
     },
   },
   {
@@ -85,8 +86,9 @@ const SEGMENTS = [
       'Community content for organic social',
     ],
     image: {
-      src: 'https://images.unsplash.com/photo-1554344728-77cf90d9ed26?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Functional fitness training facility',
+      // Sled push / functional fitness — the Hyrox movement vocabulary.
+      src: 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1000&q=80&auto=format&fit=crop',
+      alt: 'Athlete training with a weighted sled in a functional fitness facility',
     },
   },
   {

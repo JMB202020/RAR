@@ -5,9 +5,6 @@ import FadeUp from './FadeUp'
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
 
-// TODO: Replace with real case studies (lib/case-studies.ts) once first
-// cohort results are in. Until then we tell the truth: nothing to show yet.
-
 export default function ResultsGrid() {
   const locale = useLocale()
   return (
@@ -19,22 +16,20 @@ export default function ResultsGrid() {
           </p>
         </FadeUp>
         <FadeUp delay={0.08}>
-          <h2 className="mt-4 font-[family-name:var(--font-display)] text-[32px] leading-[1.1] text-brand-primary md:text-[40px]">
-            Case studies coming soon.
+          <h2 className="mt-4 max-w-[780px] font-[family-name:var(--font-display)] text-[32px] leading-[1.05] text-brand-primary md:text-[48px]">
+            We&apos;ve never needed a case study.
           </h2>
         </FadeUp>
 
         <FadeUp delay={0.16}>
-          <div className="mx-auto mt-12 max-w-[640px] rounded-[12px] border border-[rgba(0,0,0,0.12)] bg-white p-10 text-center md:p-12">
+          <div className="mx-auto mt-12 max-w-[680px] rounded-[12px] border border-[rgba(0,0,0,0.12)] bg-white p-10 text-center md:p-12">
             <p className="text-[17px] leading-[1.75] text-brand-secondary">
-              We&apos;re currently onboarding our first clients. Case studies
-              will be published here as results come in — typically within 60
-              days of launch.
+              Every Rep &amp; Reach client comes by referral from someone
+              who already trusts us.
             </p>
             <p className="mt-5 text-[17px] leading-[1.75] text-brand-secondary">
-              In the meantime, send us a few details about your gym and
-              we&apos;ll be in touch with our approach and what results you
-              can expect.
+              If you want to know what we can do for your gym, we&apos;ll
+              tell you directly — in confidence, over a call.
             </p>
             <Link
               href={localePath(locale, '/contact')}

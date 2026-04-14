@@ -9,11 +9,11 @@ import { isLocale, localePath } from '@/lib/locales'
 export const metadata: Metadata = {
   title: 'Results — Rep & Reach',
   description:
-    "Case studies and results from gyms and fitness studios we've worked with.",
+    "We've never needed a case study. Every Rep & Reach client comes by referral from someone who already trusts us.",
   openGraph: {
     title: 'Results — Rep & Reach',
     description:
-      "Case studies and results from gyms and fitness studios we've worked with.",
+      "We've never needed a case study. Every Rep & Reach client comes by referral from someone who already trusts us.",
     type: 'website',
     url: 'https://repandreach.com/results',
   },
@@ -30,7 +30,7 @@ export default async function ResultsPage({ params }: PageProps) {
   return (
     <>
       {/* Page header with full-bleed background image */}
-      <section className="relative flex min-h-[420px] items-end overflow-hidden pt-40 pb-16 md:min-h-[480px] md:pb-20">
+      <section className="relative flex min-h-[460px] items-end overflow-hidden pt-40 pb-16 md:min-h-[540px] md:pb-20">
         <Image
           src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1800&q=80&auto=format&fit=crop"
           alt=""
@@ -54,13 +54,14 @@ export default async function ResultsPage({ params }: PageProps) {
             </p>
           </FadeUp>
           <FadeUp delay={0.08}>
-            <h1 className="mt-4 max-w-[700px] font-[family-name:var(--font-display)] text-[44px] leading-[1.05] text-white md:text-[64px]">
-              Results that speak for themselves.
+            <h1 className="mt-4 max-w-[880px] font-[family-name:var(--font-display)] text-[44px] leading-[1.05] text-white md:text-[76px]">
+              We&apos;ve never needed a case study.
             </h1>
           </FadeUp>
           <FadeUp delay={0.16}>
-            <p className="mt-6 max-w-[480px] text-[17px] leading-[1.75] text-white/80">
-              Case studies from gyms and studios we&apos;ve worked with.
+            <p className="mt-6 max-w-[520px] text-[17px] leading-[1.75] text-white/80">
+              Every Rep &amp; Reach client comes by referral from someone
+              who already trusts us.
             </p>
           </FadeUp>
         </div>
@@ -68,25 +69,67 @@ export default async function ResultsPage({ params }: PageProps) {
 
       <section className="py-20 md:py-[120px]">
         <div className="mx-auto max-w-[1160px] px-6 lg:px-20">
-          <FadeUp>
-            <div className="mx-auto max-w-[640px] rounded-[12px] border border-[rgba(0,0,0,0.12)] bg-white p-10 text-center md:p-12">
-              <p className="text-[17px] leading-[1.75] text-brand-secondary">
-                We&apos;re currently onboarding our first clients. Case studies
-                will be published here as results come in — typically within 60
-                days of launch.
+          <div className="grid gap-14 md:grid-cols-12 md:gap-16">
+            <FadeUp className="md:col-span-7">
+              <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                Why we don&apos;t publish them
               </p>
-              <p className="mt-5 text-[17px] leading-[1.75] text-brand-secondary">
-                In the meantime, book a call to hear directly about our
-                approach and what results you can expect.
+              <h2 className="mt-4 font-[family-name:var(--font-display)] text-[32px] leading-[1.1] text-brand-primary md:text-[40px]">
+                The best marketing is a conversation, not a brochure.
+              </h2>
+              <p className="mt-6 max-w-[560px] text-[17px] leading-[1.75] text-brand-secondary">
+                Every gym is different. Different market, different offer,
+                different starting point. A case study from someone
+                else&apos;s business tells you very little about what
+                we&apos;d do for yours.
               </p>
-              <Link
-                href={localePath(locale, '/contact')}
-                className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
-              >
-                Send an enquiry <span aria-hidden>&rarr;</span>
-              </Link>
-            </div>
-          </FadeUp>
+              <p className="mt-5 max-w-[560px] text-[17px] leading-[1.75] text-brand-secondary">
+                So we skip the anonymised bar charts and the stock-photo
+                testimonials. When you enquire we&apos;ll tell you, in
+                confidence, exactly what we&apos;ve done for gyms like
+                yours — names, numbers, and what we&apos;d recommend for
+                your situation.
+              </p>
+            </FadeUp>
+
+            <FadeUp delay={0.12} className="md:col-span-5">
+              <div className="rounded-[12px] border border-[rgba(0,0,0,0.12)] bg-brand-bg-secondary p-8 md:p-10">
+                <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                  How we win clients
+                </p>
+                <ul className="mt-6 flex flex-col gap-5 text-[15px] leading-[1.65] text-brand-secondary">
+                  <li>
+                    <span className="block text-brand-primary">
+                      1. Word of mouth
+                    </span>
+                    An existing client or industry contact puts us in
+                    touch with you directly.
+                  </li>
+                  <li>
+                    <span className="block text-brand-primary">
+                      2. A call, not a pitch
+                    </span>
+                    We spend 20 minutes on your gym specifically — what
+                    you want, where you are, what we&apos;d do first.
+                  </li>
+                  <li>
+                    <span className="block text-brand-primary">
+                      3. Proposal in writing
+                    </span>
+                    If it&apos;s a fit, you get a clear plan and price
+                    by the end of the week.
+                  </li>
+                </ul>
+
+                <Link
+                  href={localePath(locale, '/contact')}
+                  className="mt-10 inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-7 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
+                >
+                  Send an enquiry <span aria-hidden>&rarr;</span>
+                </Link>
+              </div>
+            </FadeUp>
+          </div>
         </div>
       </section>
 

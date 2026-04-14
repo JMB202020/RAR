@@ -1,48 +1,15 @@
+import { FITNESS_BRAND_LOGOS } from './BrandLogos'
+
 /**
- * BrandMarquee — a slow-scrolling strip of well-known fitness brands.
+ * BrandMarquee — a slow-scrolling strip of well-known fitness brand logos.
  *
  * IMPORTANT: these are NOT clients of Rep & Reach. The strip exists purely
  * to show the breadth of the global gym market we operate in. The disclaimer
  * line below the label makes that explicit so nobody could read it as a
- * client-list claim.
- *
- * Brands are rendered as styled text (no logos / wordmarks) which keeps
- * trademark exposure low and makes it visually obvious that this isn't a
- * "trusted by" logo wall.
+ * client-list claim. Logos are simplified monochrome wordmarks rendered as
+ * inline SVG from components/BrandLogos.tsx — not the companies' official
+ * logos, which belong to their respective trademark owners.
  */
-
-const BRANDS = [
-  'Equinox',
-  'David Lloyd',
-  'Virgin Active',
-  'PureGym',
-  'Anytime Fitness',
-  'Planet Fitness',
-  "Gold's Gym",
-  'F45 Training',
-  "Barry's",
-  'Orangetheory',
-  'SoulCycle',
-  'The Gym Group',
-  'Third Space',
-  '1Rebel',
-  'Crunch Fitness',
-  'Lifetime Fitness',
-  '24 Hour Fitness',
-  'LA Fitness',
-  'Snap Fitness',
-  'Goodlife Health Clubs',
-  'World Gym',
-  'Fitness First',
-  'UFC Gym',
-  'CorePower Yoga',
-  'BLOK',
-  'Les Mills',
-  'Pure Fitness',
-  'True Fitness',
-  'CrossFit',
-  'Hyrox',
-]
 
 export default function BrandMarquee() {
   return (
@@ -58,17 +25,17 @@ export default function BrandMarquee() {
 
       <div className="marquee-fade mt-10 overflow-hidden md:mt-12">
         {/* Single track, content duplicated so the -50% translate loops seamlessly. */}
-        <div className="brand-marquee flex">
-          {[...BRANDS, ...BRANDS].map((brand, i) => (
-            <div
-              key={`${brand}-${i}`}
-              className="flex shrink-0 items-center px-8 md:px-12"
-            >
-              <span className="font-[family-name:var(--font-display)] text-[28px] whitespace-nowrap text-brand-primary/35 md:text-[36px]">
-                {brand}
-              </span>
-            </div>
-          ))}
+        <div className="brand-marquee flex items-center">
+          {[...FITNESS_BRAND_LOGOS, ...FITNESS_BRAND_LOGOS].map(
+            ([Logo, name], i) => (
+              <div
+                key={`${name}-${i}`}
+                className="flex shrink-0 items-center px-10 md:px-14"
+              >
+                <Logo className="h-8 w-auto text-brand-primary/50 md:h-10" />
+              </div>
+            ),
+          )}
         </div>
       </div>
     </section>
