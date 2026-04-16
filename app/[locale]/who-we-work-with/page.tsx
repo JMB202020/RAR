@@ -6,6 +6,10 @@ import SegmentSection from '@/components/SegmentSection'
 import BrandMarquee from '@/components/BrandMarquee'
 import CTABar from '@/components/CTABar'
 import { isLocale } from '@/lib/locales'
+import {
+  WHO_WE_WORK_WITH_HERO,
+  SEGMENT_PAGE_IMAGES,
+} from '@/lib/images'
 
 export const metadata: Metadata = {
   title: 'Who We Work With — Rep & Reach',
@@ -33,10 +37,7 @@ const SEGMENTS = [
       'Fast, consistent lead follow-up',
       'Active organic social between campaigns',
     ],
-    image: {
-      src: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Independent gym with free weights and training equipment',
-    },
+    image: SEGMENT_PAGE_IMAGES.independentGyms,
   },
   {
     eyebrow: 'Boutique studios',
@@ -50,10 +51,7 @@ const SEGMENTS = [
       'Editorial organic social presence',
       'Email flows that convert trials into long-term members',
     ],
-    image: {
-      src: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Boutique fitness studio with curated equipment',
-    },
+    image: SEGMENT_PAGE_IMAGES.boutiqueStudios,
   },
   {
     eyebrow: 'CrossFit boxes',
@@ -67,11 +65,7 @@ const SEGMENTS = [
       'Warm-lead remarketing',
       'Built-in referral mechanics',
     ],
-    image: {
-      // Barbell loaded with bumper plates on a gym floor — canonical CrossFit.
-      src: 'https://images.unsplash.com/photo-1534368420009-621bfab424a8?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Barbell loaded with bumper plates in a CrossFit box',
-    },
+    image: SEGMENT_PAGE_IMAGES.crossfitBoxes,
   },
   {
     eyebrow: 'Hyrox facilities',
@@ -85,11 +79,7 @@ const SEGMENTS = [
       'Training-environment video ads',
       'Community content for organic social',
     ],
-    image: {
-      // Sled push / functional fitness — the Hyrox movement vocabulary.
-      src: 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Athlete training with a weighted sled in a functional fitness facility',
-    },
+    image: SEGMENT_PAGE_IMAGES.hyroxFacilities,
   },
   {
     eyebrow: 'Pre-opening gyms',
@@ -104,10 +94,7 @@ const SEGMENTS = [
       'Local search visibility before you open',
       'Handover into standard growth once you\'re live',
     ],
-    image: {
-      src: 'https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=1000&q=80&auto=format&fit=crop',
-      alt: 'New gym being fitted out ahead of opening day',
-    },
+    image: SEGMENT_PAGE_IMAGES.preOpeningGyms,
   },
   {
     eyebrow: 'Franchise gyms',
@@ -121,10 +108,7 @@ const SEGMENTS = [
       'Franchise-compliant creative and copy',
       'Independent CRM and lead follow-up',
     ],
-    image: {
-      src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1000&q=80&auto=format&fit=crop',
-      alt: 'Large modern gym facility',
-    },
+    image: SEGMENT_PAGE_IMAGES.franchiseGyms,
   },
 ]
 
@@ -147,8 +131,8 @@ export default async function WhoWeWorkWithPage({ params }: PageProps) {
       {/* Full-bleed page hero image */}
       <div className="relative h-[320px] w-full overflow-hidden bg-brand-bg-secondary md:h-[480px]">
         <Image
-          src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1800&q=80&auto=format&fit=crop"
-          alt="Modern gym facility"
+          src={WHO_WE_WORK_WITH_HERO.src}
+          alt={WHO_WE_WORK_WITH_HERO.alt}
           fill
           sizes="100vw"
           className="object-cover"

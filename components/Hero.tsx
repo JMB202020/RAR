@@ -3,13 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import FadeUp from './FadeUp'
-import { STATS } from '@/lib/constants'
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
+import { HERO_IMAGE } from '@/lib/images'
 
 interface CTA {
   label: string
-  /** Locale-relative path, e.g. '/services'. Locale prefix added automatically. */
   path: string
   variant: 'primary' | 'secondary'
 }
@@ -18,25 +17,18 @@ interface HeroProps {
   eyebrow: string
   heading: React.ReactNode
   body: string
-  /** Small muted line below body, e.g. pricing anchor on homepage. */
+  proofLine?: string
   pricingNote?: React.ReactNode
   ctas?: CTA[]
   fullHeight?: boolean
-  /** Render the homepage variant: image right + 2x2 stats overlay (desktop). */
   withVisual?: boolean
-}
-
-const HERO_IMAGE = {
-  // Unsplash: athlete training with kettlebell. Free for commercial use.
-  // Photo by Anastase Maragos — https://unsplash.com/photos/9dzWZQWZMdE
-  src: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop',
-  alt: 'A focused athlete mid-training session in a modern gym',
 }
 
 export default function Hero({
   eyebrow,
   heading,
   body,
+  proofLine,
   pricingNote,
   ctas,
   fullHeight,
@@ -59,7 +51,7 @@ export default function Hero({
         >
           <div>
             <FadeUp>
-              <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+              <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-accent">
                 {eyebrow}
               </p>
             </FadeUp>
@@ -73,6 +65,13 @@ export default function Hero({
                 {body}
               </p>
             </FadeUp>
+            {proofLine && (
+              <FadeUp delay={0.2}>
+                <p className="mt-4 text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                  {proofLine}
+                </p>
+              </FadeUp>
+            )}
             {pricingNote && (
               <FadeUp delay={0.2}>
                 <p className="mt-4 max-w-[480px] text-[14px] leading-[1.6] text-brand-tertiary">
@@ -88,7 +87,7 @@ export default function Hero({
                       <Link
                         key={cta.label}
                         href={localePath(locale, cta.path)}
-                        className="inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
+                        className="inline-flex items-center gap-1.5 rounded-[6px] bg-brand-accent px-8 py-3.5 text-[15px] font-medium text-brand-accent-text transition-all duration-200 hover:opacity-90 hover:shadow-lg"
                       >
                         {cta.label} <span aria-hidden>&rarr;</span>
                       </Link>
@@ -96,7 +95,7 @@ export default function Hero({
                       <Link
                         key={cta.label}
                         href={localePath(locale, cta.path)}
-                        className="inline-flex items-center gap-1.5 rounded-[6px] border border-brand-primary px-8 py-3.5 text-[15px] font-medium text-brand-primary transition-colors duration-150 hover:bg-brand-primary hover:text-brand-inverse"
+                        className="inline-flex items-center gap-1.5 text-[15px] font-medium text-brand-primary underline-offset-4 transition-colors duration-150 hover:text-brand-accent hover:underline"
                       >
                         {cta.label} <span aria-hidden>&rarr;</span>
                       </Link>
@@ -118,22 +117,8 @@ export default function Hero({
                   sizes="(min-width: 1024px) 540px, (min-width: 640px) 480px, 100vw"
                   className="object-cover"
                 />
-                {/* Floating stat cards */}
-                <div className="absolute right-4 bottom-4 left-4 grid grid-cols-2 gap-2 sm:right-6 sm:bottom-6 sm:left-6 sm:gap-3">
-                  {STATS.slice(0, 4).map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-[10px] border border-white/15 bg-black/55 px-3 py-3 backdrop-blur-md sm:px-4 sm:py-3.5"
-                    >
-                      <p className="font-[family-name:var(--font-mono)] text-[22px] font-semibold leading-none text-white tabular sm:text-[26px]">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1.5 text-[11px] leading-[1.35] text-white/70 sm:text-[12px]">
-                        {stat.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                {/* Dark overlay for editorial feel and text readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-black/10" />
               </div>
             </FadeUp>
           )}

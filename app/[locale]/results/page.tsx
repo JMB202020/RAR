@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import CTABar from '@/components/CTABar'
 import FadeUp from '@/components/FadeUp'
 import { isLocale, localePath } from '@/lib/locales'
+import { RESULTS_HERO } from '@/lib/images'
 
 export const metadata: Metadata = {
   title: 'Results — Rep & Reach',
@@ -32,7 +33,7 @@ export default async function ResultsPage({ params }: PageProps) {
       {/* Page header with full-bleed background image */}
       <section className="relative flex min-h-[460px] items-end overflow-hidden pt-40 pb-16 md:min-h-[540px] md:pb-20">
         <Image
-          src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=1800&q=80&auto=format&fit=crop"
+          src={RESULTS_HERO.src}
           alt=""
           fill
           sizes="100vw"

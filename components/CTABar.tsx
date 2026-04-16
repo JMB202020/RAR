@@ -29,7 +29,7 @@ export default function CTABar() {
             >
               Enquire <span aria-hidden>&rarr;</span>
             </Link>
-            <p className="text-[13px] text-white/45">
+            <p className="mt-1 text-[13px] text-white/45">
               We respond to every enquiry within one business day.
             </p>
           </div>

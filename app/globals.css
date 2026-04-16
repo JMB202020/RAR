@@ -12,9 +12,9 @@
   --color-border-medium: rgba(0, 0, 0, 0.15);
   --color-border-dark: rgba(0, 0, 0, 0.30);
 
-  /* Accent is only used by the themed preview on /styles.
-     Neutral defaults here; ThemedPreview overrides these in a scoped wrapper. */
-  --color-accent: #0A0A0A;
+  /* Brand accent — warm, high-energy orange-red. Used on primary CTAs,
+     eyebrow labels, active nav states, and key stats. */
+  --color-accent: #FF4A1C;
   --color-accent-text: #FFFFFF;
 }
 
@@ -63,9 +63,7 @@ body.nav-open {
   font-variant-numeric: tabular-nums;
 }
 
-/* Brand marquee — slow horizontal scroll for the gym-brand strip on
-   /who-we-work-with. The component duplicates its children, so a -50%
-   translate gives a perfectly seamless loop. */
+/* Brand marquee */
 @keyframes brand-marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -78,8 +76,6 @@ body.nav-open {
   animation-play-state: paused;
 }
 
-/* Soft fade at both edges so brands enter and leave gracefully instead of
-   hard-cutting at the viewport edge. */
 .marquee-fade {
   -webkit-mask-image: linear-gradient(
     to right,
