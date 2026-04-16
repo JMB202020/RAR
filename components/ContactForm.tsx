@@ -14,6 +14,16 @@ import {
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
 
+const SERVICE_INTERESTS = [
+  'Performance (Meta + Google ads)',
+  'Lead Nurture & CRM',
+  'Local Search & Reputation',
+  'Organic Social Media',
+  'Out-of-hours phone service',
+  'Pre-sale conversion (pre-opening)',
+  'Not sure — would like advice',
+] as const
+
 interface FormData {
   name: string
   email: string
@@ -21,6 +31,7 @@ interface FormData {
   facilityType: string
   country: string
   budget: string
+  services: string[]
   referral: string
   message: string
 }
@@ -200,6 +211,26 @@ export default function ContactForm() {
           <p className={errorClasses}>{errors.budget.message}</p>
         )}
       </div>
+
+      <fieldset>
+        <legend className={labelClasses}>What are you interested in?</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {SERVICE_INTERESTS.map((service) => (
+            <label
+              key={service}
+              className="flex items-start gap-3 text-[14px] leading-[1.5] text-brand-secondary"
+            >
+              <input
+                type="checkbox"
+                value={service}
+                {...register('services')}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-brand-primary"
+              />
+              {service}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <div>
         <label className={labelClasses}>How did you hear about us?</label>

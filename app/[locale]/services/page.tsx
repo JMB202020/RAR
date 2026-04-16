@@ -19,11 +19,11 @@ import { isLocale, localePath, type LocaleSlug } from '@/lib/locales'
 export const metadata: Metadata = {
   title: 'Services — Rep & Reach',
   description:
-    'Performance marketing for fitness businesses. One core package plus add-ons for lead nurture, local search, and organic social.',
+    'Full-service marketing and sales support for fitness businesses. Meta ads, Google ads, YouTube, remarketing, email, SMS, WhatsApp, social media, local search, reputation, out-of-hours phone cover, and pre-opening campaigns.',
   openGraph: {
     title: 'Services — Rep & Reach',
     description:
-      'Performance marketing for fitness businesses. One core package plus add-ons for lead nurture, local search, and organic social.',
+      'Full-service marketing and sales support for fitness businesses. Meta ads, Google ads, YouTube, remarketing, email, SMS, WhatsApp, social media, local search, reputation, out-of-hours phone cover, and pre-opening campaigns.',
     type: 'website',
     url: 'https://repandreach.com/services',
   },
@@ -31,9 +31,11 @@ export const metadata: Metadata = {
 
 type ServiceDetail = ServicePricing & {
   description: string
+  extendedBody?: string | null
   includes: string[]
   bestFor: string
   image: ServiceImage
+  note?: string | null
   kind: 'core' | 'addon'
 }
 
@@ -106,7 +108,11 @@ function ServiceDetailSection({
     <div className="md:col-span-6">
       <FadeUp>
         <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
-          {service.kind === 'core' ? 'Core service' : 'Add-on service'}
+          {service.kind === 'core'
+            ? 'Core service'
+            : service.slug === 'pre-sale-conversion'
+              ? 'Add-on service · Pre-opening clubs'
+              : 'Add-on service'}
         </p>
       </FadeUp>
       <FadeUp delay={0.08}>
@@ -118,11 +124,21 @@ function ServiceDetailSection({
         <p className="mt-4 font-[family-name:var(--font-mono)] text-[20px] font-semibold text-brand-primary tabular">
           <PriceLabel prices={service.prices} prefix={service.prefix} />
         </p>
+        {service.note && (
+          <p className="mt-1 text-[13px] text-brand-tertiary">
+            {service.note}
+          </p>
+        )}
       </FadeUp>
       <FadeUp delay={0.16}>
         <p className="mt-5 max-w-[480px] text-[15px] leading-[1.65] text-brand-secondary">
           {service.description}
         </p>
+        {service.extendedBody && (
+          <p className="mt-4 max-w-[480px] text-[15px] leading-[1.65] text-brand-secondary">
+            {service.extendedBody}
+          </p>
+        )}
       </FadeUp>
       <FadeUp delay={0.2}>
         <ul className="mt-6 flex flex-col gap-3">

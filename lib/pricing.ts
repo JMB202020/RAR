@@ -184,11 +184,84 @@ export const ADDON_SERVICES = [
       'en-nz': 649,
     }),
   },
+  {
+    slug: 'out-of-hours-phone',
+    label: 'Out-of-Hours Phone',
+    tagline:
+      'Round-the-clock phone cover for leads and member enquiries.',
+    description:
+      'Most gym enquiries come in during evenings and weekends — exactly when your staff are on the gym floor, on a class, or at home. Every missed call is a member who\'s going to try the next gym on their list.',
+    extendedBody:
+      'Speed-to-lead is the single biggest driver of conversion. Leads contacted within 5 minutes convert at roughly 9× the rate of those contacted after 30 minutes. This service exists to make sure you\'re always the first to pick up.',
+    includes: [
+      'Evening, weekend and out-of-hours phone cover',
+      'Dedicated trained agents who know your gym',
+      'Lead capture into your CRM (where integration exists)',
+      'Email handover to your team for in-hours follow-up',
+      'Monthly call volume and outcome reporting',
+      'Scripts tailored to your membership offer and pricing',
+    ],
+    bestFor: 'Operating gyms and studios losing leads outside staffed hours',
+    prefix: 'from' as const,
+    note: null,
+    image: {
+      src: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=900&q=80&auto=format&fit=crop',
+      alt: 'Gym reception desk with phone for handling member enquiries',
+    },
+    prices: priced('monthly', {
+      'en-gb': 495,
+      'en-ie': 595,
+      'en-us': 595,
+      'en-au': 895,
+      'en-ca': 795,
+      'en-sg': 795,
+      'en-nz': 995,
+    }),
+  },
+  {
+    slug: 'pre-sale-conversion',
+    label: 'Pre-Sale Conversion',
+    cardLabel: 'Add-on · Pre-opening clubs',
+    tagline:
+      'Dedicated calling team converting pre-opening enquiries into founding members.',
+    description:
+      'The most critical 12 weeks of a new gym\'s life happen before the doors open. Every pre-opening enquiry you don\'t convert is a founding member you\'ll spend the next year trying to replace.',
+    extendedBody:
+      'Our pre-sale team works every enquiry we generate through your paid ads — calling fast, answering questions, pushing for the founding-member offer, and booking pre-opening tours. We stay on your leads daily through the build-up to opening, so you open with revenue already on the books. This is a focused three-month engagement designed to make your launch the loudest one in your local market.',
+    includes: [
+      'Dedicated calling team for the pre-opening window',
+      'Same-day contact on every enquiry',
+      'Founding-member offer management and objection handling',
+      'Pre-opening tour booking and confirmation',
+      'Daily lead-status reporting',
+      'Handover playbook into your ongoing retention and follow-up',
+      'Coordination with Performance ads and Lead Nurture services',
+    ],
+    bestFor: 'Gyms and studios in the 3 months before opening day',
+    prefix: 'from' as const,
+    note: '3-month minimum engagement',
+    image: {
+      src: 'https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=900&q=80&auto=format&fit=crop',
+      alt: 'New gym being fitted out ahead of opening day',
+    },
+    prices: priced('monthly', {
+      'en-gb': 995,
+      'en-ie': 1195,
+      'en-us': 1195,
+      'en-au': 1795,
+      'en-ca': 1595,
+      'en-sg': 1595,
+      'en-nz': 1995,
+    }),
+  },
 ] satisfies (ServicePricing & {
   description: string
   includes: string[]
   bestFor: string
   image: ServiceImage
+  note?: string | null
+  extendedBody?: string | null
+  cardLabel?: string
 })[]
 
 /**

@@ -92,6 +92,24 @@ const SEGMENTS = [
     },
   },
   {
+    eyebrow: 'Pre-opening gyms',
+    heading: 'Open loud, not quiet.',
+    body: [
+      'A strong pre-sale campaign is the difference between opening with 50 members and opening with 500. We run the full pre-opening playbook — paid ads, fast human follow-up, founding-member offer management — so you open with revenue on day one.',
+    ],
+    bullets: [
+      'Performance ads tuned to founding-member campaigns',
+      'Pre-sale calling team working every enquiry daily',
+      'Founding-member offer strategy',
+      'Local search visibility before you open',
+      'Handover into standard growth once you\'re live',
+    ],
+    image: {
+      src: 'https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=1000&q=80&auto=format&fit=crop',
+      alt: 'New gym being fitted out ahead of opening day',
+    },
+  },
+  {
     eyebrow: 'Franchise gyms',
     heading: 'Local marketing for franchisees who want to grow.',
     body: [

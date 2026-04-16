@@ -58,6 +58,8 @@ export const FOOTER_SERVICE_LINKS = [
   { label: 'Lead Nurture & CRM', path: '/services#lead-nurture-crm' },
   { label: 'Local Search & Reputation', path: '/services#local-search' },
   { label: 'Organic Social Media', path: '/services#organic-social-media' },
+  { label: 'Out-of-Hours Phone', path: '/services#out-of-hours-phone' },
+  { label: 'Pre-Sale Conversion', path: '/services#pre-sale-conversion' },
 ]
 
 export const FACILITY_TYPES = [

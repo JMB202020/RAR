@@ -116,49 +116,62 @@ export default function PricingCards({
         </div>
       </div>
 
-      {/* Add-on services — 3 column grid */}
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
-        {ADDON_SERVICES.map((addon) => (
-          <div
-            key={addon.slug}
-            className="flex flex-col overflow-hidden rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white"
-          >
-            <div className="relative aspect-[16/10] w-full bg-brand-bg-secondary">
-              <Image
-                src={addon.image.src}
-                alt={addon.image.alt}
-                fill
-                sizes="(min-width: 1024px) 360px, (min-width: 768px) 33vw, 100vw"
-                className="object-cover"
-              />
+      {/* Add-on services grid */}
+      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {ADDON_SERVICES.map((addon) => {
+          const cardLabel =
+            'cardLabel' in addon && addon.cardLabel
+              ? addon.cardLabel
+              : 'Add-on'
+          const note = 'note' in addon ? (addon.note as string | null) : null
+          return (
+            <div
+              key={addon.slug}
+              className="flex flex-col overflow-hidden rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white"
+            >
+              <div className="relative aspect-[16/10] w-full bg-brand-bg-secondary">
+                <Image
+                  src={addon.image.src}
+                  alt={addon.image.alt}
+                  fill
+                  sizes="(min-width: 1024px) 360px, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-7">
+                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                  {cardLabel}
+                </p>
+                <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
+                  {addon.label}
+                </h3>
+                <p className="mt-3 font-[family-name:var(--font-mono)] text-[18px] font-medium text-brand-primary tabular">
+                  {formatPrice(addon.prices[locale], locale, addon.prefix)}
+                </p>
+                {note && (
+                  <p className="mt-1 text-[12px] text-brand-tertiary">
+                    {note}
+                  </p>
+                )}
+                <p className="mt-4 flex-1 text-[14px] leading-[1.65] text-brand-secondary">
+                  {addon.tagline}
+                </p>
+                <Link
+                  href={localePath(locale, `/services#${addon.slug}`)}
+                  className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
+                >
+                  Learn more <span aria-hidden>&rarr;</span>
+                </Link>
+              </div>
             </div>
-            <div className="flex flex-1 flex-col p-7">
-              <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
-                Add-on
-              </p>
-              <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
-                {addon.label}
-              </h3>
-              <p className="mt-3 font-[family-name:var(--font-mono)] text-[18px] font-medium text-brand-primary tabular">
-                {formatPrice(addon.prices[locale], locale, addon.prefix)}
-              </p>
-              <p className="mt-4 flex-1 text-[14px] leading-[1.65] text-brand-secondary">
-                {addon.tagline}
-              </p>
-              <Link
-                href={localePath(locale, `/services#${addon.slug}`)}
-                className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-brand-primary transition-opacity duration-150 hover:opacity-70"
-              >
-                Learn more <span aria-hidden>&rarr;</span>
-              </Link>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <p className="mt-8 text-[13px] leading-[1.6] text-brand-tertiary">
-        All add-ons require the Performance package. Prices shown in{' '}
-        {currencyForLocale(locale)}.
+        Most add-ons pair with the Performance package. Prices shown in{' '}
+        {currencyForLocale(locale)}. Pre-sale engagements are 3-month
+        minimum.
       </p>
     </div>
   )
