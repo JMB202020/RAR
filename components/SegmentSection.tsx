@@ -6,7 +6,6 @@ import { Check } from 'lucide-react'
 import FadeUp from './FadeUp'
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
-import { IMAGE_FILTER } from '@/lib/images'
 
 interface SegmentSectionProps {
   eyebrow: string
@@ -89,7 +88,6 @@ export default function SegmentSection({
           fill
           sizes="(min-width: 1024px) 540px, 100vw"
           className="object-cover"
-          style={{ filter: IMAGE_FILTER }}
         />
       </div>
     </FadeUp>

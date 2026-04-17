@@ -84,7 +84,7 @@ export default function Nav() {
           <LocalePicker variant="nav" />
           <Link
             href={contactHref}
-            className="inline-flex items-center gap-1.5 rounded-[6px] bg-brand-accent px-5 py-2.5 text-[14px] font-medium text-brand-accent-text transition-all duration-200 hover:opacity-90 hover:shadow-lg"
+            className="inline-flex items-center gap-1.5 rounded-[6px] bg-brand-primary px-5 py-2.5 text-[14px] font-medium text-brand-inverse transition-opacity duration-150 hover:opacity-80"
           >
             Enquire <span aria-hidden>&rarr;</span>
           </Link>

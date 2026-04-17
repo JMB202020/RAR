@@ -12,11 +12,10 @@
   --color-border-medium: rgba(0, 0, 0, 0.15);
   --color-border-dark: rgba(0, 0, 0, 0.30);
 
-  /* Brand accent — electric lime. High-energy, performance-coded.
-     Text on accent backgrounds must be #0A0A0A for contrast. */
-  --color-accent: #D4FF00;
-  --color-accent-hover: #BFEB00;
-  --color-accent-text: #0A0A0A;
+  /* Accent is only used by the themed preview on /styles.
+     Neutral defaults here; ThemedPreview overrides these in a scoped wrapper. */
+  --color-accent: #0A0A0A;
+  --color-accent-text: #FFFFFF;
 }
 
 @theme inline {
@@ -64,7 +63,9 @@ body.nav-open {
   font-variant-numeric: tabular-nums;
 }
 
-/* Brand marquee */
+/* Brand marquee — slow horizontal scroll for the gym-brand strip on
+   /who-we-work-with. The component duplicates its children, so a -50%
+   translate gives a perfectly seamless loop. */
 @keyframes brand-marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -77,6 +78,8 @@ body.nav-open {
   animation-play-state: paused;
 }
 
+/* Soft fade at both edges so brands enter and leave gracefully instead of
+   hard-cutting at the viewport edge. */
 .marquee-fade {
   -webkit-mask-image: linear-gradient(
     to right,

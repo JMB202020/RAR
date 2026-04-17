@@ -6,7 +6,6 @@ import Hero from '@/components/Hero'
 import ContactForm from '@/components/ContactForm'
 import FadeUp from '@/components/FadeUp'
 import { TARGET_SEGMENTS } from '@/lib/constants'
-import { CONTACT_IMAGE } from '@/lib/images'
 import { isLocale } from '@/lib/locales'
 
 export const metadata: Metadata = {
@@ -57,8 +56,8 @@ export default async function ContactPage({ params }: PageProps) {
               <FadeUp delay={0.04}>
                 <div className="relative h-[240px] w-full overflow-hidden rounded-[12px] bg-brand-bg-secondary md:h-[280px]">
                   <Image
-                    src={CONTACT_IMAGE.src}
-                    alt={CONTACT_IMAGE.alt}
+                    src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=1200&q=80&auto=format&fit=crop"
+                    alt="Modern gym facility"
                     fill
                     sizes="(min-width: 1024px) 540px, 100vw"
                     className="object-cover"
@@ -119,26 +118,6 @@ export default async function ContactPage({ params }: PageProps) {
               </FadeUp>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Calendar embed placeholder */}
-      <section className="border-t border-[var(--color-border-light)] bg-brand-bg-secondary py-16 md:py-20">
-        <div className="mx-auto max-w-[640px] px-6 text-center lg:px-20">
-          <FadeUp>
-            <h3 className="font-[family-name:var(--font-display)] text-[24px] leading-[1.1] text-brand-primary md:text-[28px]">
-              Prefer to book directly?
-            </h3>
-            <p className="mt-3 text-[15px] leading-[1.65] text-brand-secondary">
-              Find a time that works for you.
-            </p>
-            {/* TODO: Replace with actual calendar embed URL when Cal.com or Calendly account is set up. */}
-            <div className="mt-8 flex h-[320px] items-center justify-center rounded-[12px] border border-dashed border-[var(--color-border-medium)] bg-white">
-              <p className="text-[14px] text-brand-tertiary">
-                Calendar embed — coming soon
-              </p>
-            </div>
-          </FadeUp>
         </div>
       </section>
     </>
