@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Play, X } from 'lucide-react'
 import FadeUp from './FadeUp'
+import { VIDEO_THUMBNAIL, IMAGE_FILTER } from '@/lib/images'
 
 export default function VideoPlaceholder() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -18,8 +20,18 @@ export default function VideoPlaceholder() {
               className="group relative w-full overflow-hidden rounded-[12px] bg-brand-bg-dark"
               aria-label="Play video: How we build a gym campaign"
             >
-              <div className="flex aspect-video items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
+              <div className="relative flex aspect-video items-center justify-center">
+                <Image
+                  src={VIDEO_THUMBNAIL.src}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 1120px, 100vw"
+                  className="object-cover"
+                  style={{ filter: IMAGE_FILTER }}
+                  aria-hidden
+                />
+                <div className="absolute inset-0 bg-black/55" />
+                <div className="relative flex flex-col items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-accent transition-transform duration-200 group-hover:scale-110">
                     <Play size={28} className="ml-1 text-brand-accent-text" />
                   </div>

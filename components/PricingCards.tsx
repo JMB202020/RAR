@@ -9,6 +9,7 @@ import {
   Share2,
   Phone,
   Rocket,
+  type LucideIcon,
 } from 'lucide-react'
 import {
   CORE_PACKAGE,
@@ -145,17 +146,17 @@ export default function PricingCards({
               key={addon.slug}
               className="group flex flex-col rounded-[8px] border border-[rgba(0,0,0,0.12)] bg-white p-7 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="flex items-center gap-2.5">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent/10 transition-colors duration-200 group-hover:bg-brand-accent/20">
                 <Icon
-                  size={20}
-                  className="text-brand-tertiary transition-colors duration-200 group-hover:text-brand-accent"
+                  size={24}
+                  className="text-brand-accent"
                   aria-hidden
                 />
-                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
-                  {cardLabel}
-                </p>
               </div>
-              <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
+              <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-brand-tertiary">
+                {cardLabel}
+              </p>
+              <h3 className="mt-3 text-[20px] font-semibold leading-[1.25] text-brand-primary">
                 {addon.label}
               </h3>
               <p className="mt-3 font-[family-name:var(--font-mono)] text-[18px] font-medium text-brand-primary tabular">

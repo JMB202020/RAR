@@ -12,10 +12,11 @@
   --color-border-medium: rgba(0, 0, 0, 0.15);
   --color-border-dark: rgba(0, 0, 0, 0.30);
 
-  /* Brand accent — warm, high-energy orange-red. Used on primary CTAs,
-     eyebrow labels, active nav states, and key stats. */
-  --color-accent: #FF4A1C;
-  --color-accent-text: #FFFFFF;
+  /* Brand accent — electric lime. High-energy, performance-coded.
+     Text on accent backgrounds must be #0A0A0A for contrast. */
+  --color-accent: #D4FF00;
+  --color-accent-hover: #BFEB00;
+  --color-accent-text: #0A0A0A;
 }
 
 @theme inline {

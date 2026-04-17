@@ -4,7 +4,7 @@ import FadeUp from './FadeUp'
 
 export default function ApproachSection() {
   return (
-    <section className="bg-white py-24 md:py-[96px]">
+    <section className="bg-brand-bg-dark py-24 md:py-[96px]">
       <div className="mx-auto max-w-[1160px] px-6 lg:px-20">
         <FadeUp>
           <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-accent">
@@ -12,12 +12,12 @@ export default function ApproachSection() {
           </p>
         </FadeUp>
         <FadeUp delay={0.08}>
-          <h2 className="mt-4 max-w-[700px] font-[family-name:var(--font-display)] text-[32px] leading-[1.05] text-brand-primary md:text-[40px]">
+          <h2 className="mt-4 max-w-[700px] font-[family-name:var(--font-display)] text-[32px] leading-[1.05] text-brand-inverse md:text-[40px]">
             Most gym marketing fails for the same three reasons.
           </h2>
         </FadeUp>
         <FadeUp delay={0.12}>
-          <p className="mt-4 text-[17px] leading-[1.75] text-brand-secondary">
+          <p className="mt-4 text-[17px] leading-[1.75] text-white/60">
             Here&apos;s what we do differently.
           </p>
         </FadeUp>
@@ -25,14 +25,14 @@ export default function ApproachSection() {
         <div className="mt-16 grid gap-12 md:grid-cols-3 md:gap-10">
           {BLOCKS.map((block, i) => (
             <FadeUp key={block.eyebrow} delay={0.16 + i * 0.08}>
-              <div className="border-t border-[var(--color-border-light)] pt-8">
+              <div className="border-t border-white/10 pt-8">
                 <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-brand-accent">
                   {block.eyebrow}
                 </p>
-                <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-primary">
+                <h3 className="mt-4 text-[20px] font-semibold leading-[1.25] text-brand-inverse">
                   {block.heading}
                 </h3>
-                <p className="mt-4 text-[15px] leading-[1.7] text-brand-secondary">
+                <p className="mt-4 text-[15px] leading-[1.7] text-[#D4D4D4]">
                   {block.body}
                 </p>
               </div>

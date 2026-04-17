@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { TARGET_SEGMENTS } from '@/lib/constants'
-import { SEGMENT_IMAGES } from '@/lib/images'
+import { SEGMENT_IMAGES, IMAGE_FILTER } from '@/lib/images'
 import FadeUp from './FadeUp'
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
@@ -47,6 +47,7 @@ export default function WhoWeWorkWith() {
                   fill
                   sizes="(min-width: 768px) 340px, 50vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{ filter: IMAGE_FILTER }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <p className="absolute right-3 bottom-3 left-3 text-[13px] font-medium text-white md:text-[14px]">

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Hero from '@/components/Hero'
 import PricingCards from '@/components/PricingCards'
@@ -7,7 +6,6 @@ import ServiceCombinations from '@/components/ServiceCombinations'
 import LeadMagnet from '@/components/LeadMagnet'
 import CTABar from '@/components/CTABar'
 import { isLocale } from '@/lib/locales'
-import { SERVICES_HERO } from '@/lib/images'
 
 export const metadata: Metadata = {
   title: 'Services — Rep & Reach',
@@ -37,20 +35,6 @@ export default async function ServicesPage({ params }: PageProps) {
         heading="Performance marketing, end to end."
         body="Everything a gym needs to generate leads, convert members, and grow — under one roof."
       />
-
-      {/* Hero supporting image */}
-      <div className="mx-auto -mt-4 mb-4 max-w-[1160px] px-6 lg:px-20">
-        <div className="relative h-[260px] w-full overflow-hidden rounded-[12px] bg-brand-bg-secondary md:h-[400px]">
-          <Image
-            src={SERVICES_HERO.src}
-            alt={SERVICES_HERO.alt}
-            fill
-            sizes="(min-width: 1024px) 1120px, 100vw"
-            className="object-cover"
-            priority
-          />
-        </div>
-      </div>
 
       <section className="bg-brand-bg-secondary py-24 md:py-[96px]">
         <PricingCards

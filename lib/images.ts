@@ -9,92 +9,69 @@ function unsplash(id: string, w = 1200, q = 80) {
   return `https://images.unsplash.com/photo-${id}?w=${w}&q=${q}&auto=format&fit=crop`
 }
 
+/** Standard CSS treatment applied to all site images for visual cohesion. */
+export const IMAGE_FILTER = 'saturate(0.85) contrast(1.05)'
+
 // ─── Homepage ──────────────────────────────────────────────────────────────
 
 export const HERO_IMAGE = {
-  src: unsplash('1540497077202-7c8a3999166f', 1400),
-  alt: 'Gym interior with rack of weights and training equipment',
+  src: unsplash('1593079831268-3381b0db4a77', 1600),
+  alt: 'Dark atmospheric gym interior with dramatic lighting and barbells in foreground',
 }
 
-// ─── Who-we-work-with segment tiles ────────────────────────────────────────
-// Six visually distinct images — one per segment. A prospect scanning the
-// grid must immediately understand which tile is which without reading labels.
+// ─── Who-we-work-with segment tiles (homepage + segment page) ──────────────
+// Six visually distinct images — one per segment. Each must be instantly
+// distinguishable by segment type without reading the label.
 
 export const SEGMENT_IMAGES = {
   independentGyms: {
-    src: unsplash('1534438327276-14e5300c3a48', 900),
-    alt: 'Independent gym with free weights and athletes training',
+    src: unsplash('1623874228601-f4193c7b1a30', 900),
+    alt: 'Gritty independent gym with exposed brick and free weights',
   },
   boutiqueStudios: {
-    src: unsplash('1518611012118-696072aa579a', 900),
-    alt: 'Boutique fitness studio with warm lighting and curated equipment',
+    src: unsplash('1518310952931-b1de897abd40', 900),
+    alt: 'Clean minimal boutique studio with reformers and warm lighting',
   },
   crossfitBoxes: {
-    src: unsplash('1534368420009-621bfab424a8', 900),
-    alt: 'Barbell loaded with bumper plates in a CrossFit box',
+    src: unsplash('1517963628607-235ccdd5476c', 900),
+    alt: 'CrossFit box with rig, bumper plates, and athletes mid-workout',
   },
   hyroxFacilities: {
     src: unsplash('1526506118085-60ce8714f8c5', 900),
-    alt: 'Athlete training with a weighted sled in a functional fitness facility',
+    alt: 'Athlete pushing a weighted sled in a functional fitness facility',
   },
   boxingGyms: {
-    src: unsplash('1549719386-882f20f39ad8', 900),
-    alt: 'Heavy bags hanging in a boxing gym',
+    src: unsplash('1615117972428-28de87a94938', 900),
+    alt: 'Boxing gym interior with heavy bags and a ring visible',
   },
   pilatesYoga: {
-    src: unsplash('1544367567-0f2fcb009e0b', 900),
-    alt: 'Pilates reformer in a clean modern studio',
+    src: unsplash('1518310383802-640c2de311b2', 900),
+    alt: 'Modern pilates reformer studio with mats and equipment in rows',
   },
 }
 
 // ─── Who-we-work-with page hero ────────────────────────────────────────────
 
 export const WHO_WE_WORK_WITH_HERO = {
-  src: unsplash('1534438327276-14e5300c3a48', 1800),
-  alt: 'Modern gym facility',
+  src: unsplash('1558618666-fcd25c85cd64', 1800),
+  alt: 'Wide-angle view of a large modern gym facility',
 }
 
-// ─── Per-segment images on /who-we-work-with page ──────────────────────────
+// ─── Per-segment images on /who-we-work-with page (same as tiles) ──────────
 
 export const SEGMENT_PAGE_IMAGES = {
-  independentGyms: {
-    src: unsplash('1540497077202-7c8a3999166f', 1000),
-    alt: 'Independent gym with free weights and training equipment',
-  },
-  boutiqueStudios: {
-    src: unsplash('1518611012118-696072aa579a', 1000),
-    alt: 'Boutique fitness studio with curated equipment',
-  },
-  crossfitBoxes: {
-    src: unsplash('1534368420009-621bfab424a8', 1000),
-    alt: 'Barbell loaded with bumper plates in a CrossFit box',
-  },
-  hyroxFacilities: {
-    src: unsplash('1526506118085-60ce8714f8c5', 1000),
-    alt: 'Athlete training with a weighted sled in a functional fitness facility',
-  },
+  independentGyms: SEGMENT_IMAGES.independentGyms,
+  boutiqueStudios: SEGMENT_IMAGES.boutiqueStudios,
+  crossfitBoxes: SEGMENT_IMAGES.crossfitBoxes,
+  hyroxFacilities: SEGMENT_IMAGES.hyroxFacilities,
   preOpeningGyms: {
     src: unsplash('1517963879433-6ad2b056d712', 1000),
     alt: 'New gym being fitted out ahead of opening day',
   },
   franchiseGyms: {
-    src: unsplash('1558618666-fcd25c85cd64', 1000),
-    alt: 'Large modern gym facility',
+    src: unsplash('1571902943202-507ec2618e8f', 1000),
+    alt: 'Large commercial gym with rows of cardio and strength equipment',
   },
-}
-
-// ─── Services page ─────────────────────────────────────────────────────────
-
-export const SERVICES_HERO = {
-  src: unsplash('1571902943202-507ec2618e8f', 1600),
-  alt: 'Professional gym facility with members training',
-}
-
-// ─── Process section (homepage) background ─────────────────────────────────
-
-export const PROCESS_BG = {
-  src: unsplash('1517836357463-d25dfeac3438', 1600),
-  alt: '', // decorative
 }
 
 // ─── Results page header ───────────────────────────────────────────────────
@@ -107,6 +84,17 @@ export const RESULTS_HERO = {
 // ─── Contact page ──────────────────────────────────────────────────────────
 
 export const CONTACT_IMAGE = {
-  src: unsplash('1571902943202-507ec2618e8f', 1200),
-  alt: 'Modern gym facility',
+  src: unsplash('1534438327276-14e5300c3a48', 1200),
+  alt: 'Gym interior with weights and training equipment',
 }
+
+// ─── About page ────────────────────────────────────────────────────────────
+
+export const ABOUT_WORKSPACE = {
+  src: unsplash('1497366216548-37526070297c', 1200),
+  alt: 'Modern workspace with laptop and coffee — the agency at work',
+}
+
+// ─── Video placeholder thumbnail ───────────────────────────────────────────
+
+export const VIDEO_THUMBNAIL = HERO_IMAGE // same hero image, will get heavier overlay in component

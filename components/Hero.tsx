@@ -5,7 +5,7 @@ import Image from 'next/image'
 import FadeUp from './FadeUp'
 import { useLocale } from '@/lib/useLocale'
 import { localePath } from '@/lib/locales'
-import { HERO_IMAGE } from '@/lib/images'
+import { HERO_IMAGE, IMAGE_FILTER } from '@/lib/images'
 
 interface CTA {
   label: string
@@ -116,9 +116,9 @@ export default function Hero({
                   priority
                   sizes="(min-width: 1024px) 540px, (min-width: 640px) 480px, 100vw"
                   className="object-cover"
+                  style={{ filter: IMAGE_FILTER }}
                 />
-                {/* Dark overlay for editorial feel and text readability */}
-                <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
               </div>
             </FadeUp>
           )}
