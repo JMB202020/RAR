@@ -1,0 +1,21 @@
+{
+  "name": "site-qa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "site-qa": "./run.mjs"
+  },
+  "scripts": {
+    "qa": "node run.mjs",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "axe-core": "^4.10.2",
+    "chrome-launcher": "^1.1.2",
+    "lighthouse": "^12.3.0",
+    "pixelmatch": "^6.0.0",
+    "playwright": "^1.49.1",
+    "pngjs": "^7.0.0"
+  }
+}
