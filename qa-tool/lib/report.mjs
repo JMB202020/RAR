@@ -42,8 +42,12 @@ function pageCard(url, entries, outputDir) {
   const shots = entries.map((e) => {
     const rel = e.screenshot ? relative(outputDir, e.screenshot) : null
     const diff = e.diff ? relative(outputDir, e.diff) : null
-    return { viewport: e.viewport, rel, diff, visual: e.visual, status: e.status, loadMs: e.loadMs }
+    return {
+      viewport: e.viewport, browser: e.browser, rel, diff, visual: e.visual,
+      status: e.status, loadMs: e.loadMs, consent: e.consent,
+    }
   })
+  const interactions = entries.find((e) => e.interactions)?.interactions
   return `
   <section class="page-card">
     <h3><a href="${esc(url)}" target="_blank">${esc(url)}</a></h3>
@@ -52,11 +56,19 @@ function pageCard(url, entries, outputDir) {
       <span class="count warn">${warns} warning${warns === 1 ? '' : 's'}</span>
       <span class="count info">${infos} info</span>
     </div>
+    ${interactions && interactions.length ? `
+      <details class="interactions">
+        <summary>Interactions (${interactions.length} step${interactions.length === 1 ? '' : 's'})</summary>
+        <ul>${interactions.map((i) => `<li><code>${esc(i.step)}</code> ${i.cta ? `— CTA: <em>${esc(i.cta)}</em>` : ''}${i.fields !== undefined ? ` — fields: ${i.fields}` : ''}${i.navigated ? ` — navigated` : ''}${i.selector ? ` — <code>${esc(i.selector)}</code>` : ''}</li>`).join('')}</ul>
+      </details>` : ''}
     <div class="shots">
       ${shots.map((s) => `
         <figure>
-          <figcaption>${esc(s.viewport)} — HTTP ${s.status} — ${s.loadMs}ms${s.visual ? ` — ${esc(s.visual.status)}` : ''}</figcaption>
-          ${s.rel ? `<a href="${esc(s.rel)}" target="_blank"><img loading="lazy" src="${esc(s.rel)}" alt="${esc(s.viewport)} screenshot"></a>` : '<div class="no-shot">no screenshot</div>'}
+          <figcaption>
+            ${esc(s.browser || '')} / ${esc(s.viewport)} — HTTP ${s.status} — ${s.loadMs}ms${s.visual ? ` — ${esc(s.visual.status)}` : ''}
+            ${s.consent?.dismissed ? ` · <span class="tag">consent dismissed</span>` : ''}
+          </figcaption>
+          ${s.rel ? `<a href="${esc(s.rel)}" target="_blank"><img loading="lazy" src="${esc(s.rel)}" alt="${esc(s.browser || '')} ${esc(s.viewport)} screenshot"></a>` : '<div class="no-shot">no screenshot</div>'}
           ${s.diff ? `<a href="${esc(s.diff)}" target="_blank" class="diff-link">view pixel diff</a>` : ''}
         </figure>`).join('')}
     </div>
@@ -66,7 +78,7 @@ function pageCard(url, entries, outputDir) {
   </section>`
 }
 
-export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, pages, lighthouse, summary }) {
+export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, pages, lighthouse, summary, interactionLogs }) {
   const byUrl = groupFindingsByUrl(pages)
   const totalFindings = pages.flatMap((p) => p.findings || [])
   const errs = countBy(totalFindings, 'error')
@@ -160,13 +172,21 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
   th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
   details summary { cursor: pointer; color: #90cdf4; padding: 8px 0; }
+  .interactions { margin-bottom: 12px; }
+  .interactions ul { margin: 4px 0 0 16px; padding: 0; }
+  .interactions li { padding: 2px 0; font-size: 13px; color: var(--muted); }
+  .interactions code { color: #90cdf4; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
+  .tag { display: inline-block; font-size: 10px; background: #2d3748; color: var(--muted); padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
 </style>
 </head>
 <body>
 <header>
   <h1>QA Report — ${esc(seedUrl)}</h1>
   <div class="meta">
-    Started ${esc(startedAt)} · Finished ${esc(finishedAt)} · ${esc(summary.duration)} · ${esc(String(summary.pageCount))} URL${summary.pageCount === 1 ? '' : 's'} × ${esc(String(summary.viewportCount))} viewport${summary.viewportCount === 1 ? '' : 's'}
+    Started ${esc(startedAt)} · Finished ${esc(finishedAt)} · ${esc(summary.duration)}<br>
+    ${esc(String(summary.pageCount))} URL${summary.pageCount === 1 ? '' : 's'}
+    ${summary.browsers ? `× ${summary.browsers.length} browser${summary.browsers.length === 1 ? '' : 's'} (${esc(summary.browsers.join(', '))})` : ''}
+    ${summary.viewports ? `× ${summary.viewports.length} viewport${summary.viewports.length === 1 ? '' : 's'} (${esc(summary.viewports.join(', '))})` : ''}
   </div>
 </header>
 <section class="summary">

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "qa": "node run.mjs",
-    "postinstall": "playwright install chromium"
+    "postinstall": "playwright install chromium firefox webkit"
   },
   "dependencies": {
     "axe-core": "^4.10.2",
