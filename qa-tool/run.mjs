@@ -147,11 +147,22 @@ async function main() {
   })
 
   const all = results.flatMap((r) => r.findings || [])
-  const errs = all.filter((f) => f.severity === 'error').length
-  const warns = all.filter((f) => f.severity === 'warn').length
-  const infos = all.filter((f) => f.severity === 'info').length
+  const rawErrs = all.filter((f) => f.severity === 'error').length
+  const rawWarns = all.filter((f) => f.severity === 'warn').length
+  const rawInfos = all.filter((f) => f.severity === 'info').length
 
-  process.stdout.write(`\n[site-qa] findings: ${errs} error, ${warns} warn, ${infos} info\n`)
+  // Read deduped counts from the report JSON we just wrote
+  let errs = rawErrs, warns = rawWarns, infos = rawInfos
+  try {
+    const { readFile } = await import('node:fs/promises')
+    const parsed = JSON.parse(await readFile(jsonPath, 'utf8'))
+    errs = parsed.totals?.errors ?? rawErrs
+    warns = parsed.totals?.warnings ?? rawWarns
+    infos = parsed.totals?.info ?? rawInfos
+  } catch {}
+
+  process.stdout.write(`\n[site-qa] unique issues: ${errs} error, ${warns} warn, ${infos} info\n`)
+  process.stdout.write(`[site-qa] (raw findings across all ${activeBrowsers.length * activeViewports.length} combos: ${rawErrs} error, ${rawWarns} warn, ${rawInfos} info)\n`)
   process.stdout.write(`[site-qa] report:    ${pathToFileURL(reportPath).href}\n`)
   process.stdout.write(`[site-qa] dev notes: ${devMdPath}\n`)
   process.stdout.write(`[site-qa] json:      ${jsonPath}\n`)

@@ -4,6 +4,74 @@ import { join, relative } from 'node:path'
 const SEV_ORDER = { error: 0, warn: 1, info: 2 }
 const SEV_MD = { error: 'Errors', warn: 'Warnings', info: 'Info' }
 
+// What matters for look-and-feel QA. Category order == display order.
+const CATEGORIES = [
+  { id: 'design',       label: 'Design & responsiveness', codes: /^(horizontal-overflow|hero-img-|sticky-header-|visual-regression|visual-size-changed|empty-section|img-missing-alt|broken-image)/ },
+  { id: 'functionality', label: 'Functionality',          codes: /^(mobile-menu-|nav-link-|nav-hash-|form-|interaction-|console-error|uncaught-exception|http-error|http-bad-response|request-failed|nav-failed)/ },
+  { id: 'accessibility', label: 'Accessibility',          codes: /^(a11y-|no-focus-ring|touch-target-|no-h1|multiple-h1|skipped-heading|html-no-lang|input-no-label|duplicate-id)/ },
+  { id: 'seo',          label: 'SEO & metadata',          codes: /^(seo-)/ },
+  { id: 'content',      label: 'Content hygiene',         codes: /^(placeholder-|empty-link|target-blank-no-noopener|javascript-link)/ },
+  { id: 'performance',  label: 'Performance',             codes: /^(lighthouse-)/ },
+  { id: 'other',        label: 'Other',                   codes: /.*/ },
+]
+
+function categoryFor(code) {
+  return CATEGORIES.find((c) => c.codes.test(code))?.id || 'other'
+}
+
+// Dedup key: same URL + same code + same concrete target (selector/src/href)
+// means the "same issue", regardless of which browser×viewport observed it.
+function dedupKey(url, f) {
+  const d = f.detail || {}
+  const target = d.selector || d.src || d.href || d.id || ''
+  return `${url}|${f.code}|${target}`
+}
+
+// Collapse per-combo findings into a deduplicated issue list. Each unique
+// (url, code, target) becomes one issue with a `combos` list + `count`.
+function dedupIssues(pages) {
+  const map = new Map()
+  for (const p of pages) {
+    for (const f of p.findings || []) {
+      const key = dedupKey(p.url, f)
+      if (!map.has(key)) {
+        map.set(key, {
+          url: p.url,
+          code: f.code,
+          severity: f.severity,
+          message: f.message,
+          detail: f.detail || {},
+          category: categoryFor(f.code),
+          combos: [],
+        })
+      }
+      const issue = map.get(key)
+      if (p.browser && p.viewport) issue.combos.push(`${p.browser}/${p.viewport}`)
+      // Preserve highest severity if the same issue is tagged differently
+      if (SEV_ORDER[f.severity] < SEV_ORDER[issue.severity]) issue.severity = f.severity
+    }
+  }
+  const issues = [...map.values()]
+  for (const i of issues) {
+    i.combos = [...new Set(i.combos)]
+    i.count = i.combos.length || 1
+  }
+  // Rank: error > warn > info, then by number of combos affected (wider = worse)
+  issues.sort((a, b) =>
+    SEV_ORDER[a.severity] - SEV_ORDER[b.severity]
+    || b.count - a.count
+    || a.code.localeCompare(b.code)
+  )
+  return issues
+}
+
+function combosLabel(issue, totalCombos) {
+  if (!issue.combos.length) return ''
+  if (issue.combos.length === totalCombos) return 'all browser × viewport combos'
+  if (issue.combos.length > 6) return `${issue.combos.length}/${totalCombos} combos`
+  return issue.combos.join(', ')
+}
+
 // Collapse deeply-nested detail into a terse one-line hint a dev can act on.
 function reproHint(f) {
   const d = f.detail || {}
@@ -19,25 +87,32 @@ function reproHint(f) {
   return bits.join(' · ')
 }
 
-// Build the DEVELOPER.md — one-line-per-finding, grouped by URL then severity.
-function buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse }) {
-  const byUrl = new Map()
-  for (const p of pages) {
-    const key = p.url
-    if (!byUrl.has(key)) byUrl.set(key, { errors: [], warn: [], info: [], meta: [] })
-    const bucket = byUrl.get(key)
-    for (const f of p.findings || []) {
-      const ctx = p.browser && p.viewport ? ` (${p.browser}/${p.viewport})` : ''
-      const hint = reproHint(f)
-      const line = `- **[${f.code}]**${ctx} ${f.message}${hint ? ` — ${hint}` : ''}`
-      if (f.severity === 'error') bucket.errors.push(line)
-      else if (f.severity === 'warn') bucket.warn.push(line)
-      else bucket.info.push(line)
-    }
-  }
-
+// Build the DEVELOPER.md — grouped by CATEGORY first (design/functionality/etc)
+// with "top priority" first, then by URL as a secondary view.
+function buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse, issues }) {
   const totals = { error: 0, warn: 0, info: 0 }
-  for (const f of pages.flatMap((p) => p.findings || [])) totals[f.severity] = (totals[f.severity] || 0) + 1
+  for (const i of issues) totals[i.severity] = (totals[i.severity] || 0) + 1
+
+  const totalCombos = (summary.browsers?.length || 1) * (summary.viewports?.length || 1)
+
+  // Only show errors + warns in the top priority section. Info goes at the end.
+  const topIssues = issues
+    .filter((i) => i.severity !== 'info')
+    .slice(0, 20)
+
+  const categoryBlocks = CATEGORIES.map((cat) => {
+    const catIssues = issues.filter((i) => i.category === cat.id && i.severity !== 'info')
+    if (!catIssues.length) return null
+    return [
+      `### ${cat.label} (${catIssues.length})`,
+      '',
+      ...catIssues.map((i) => {
+        const hint = reproHint({ detail: i.detail })
+        const where = combosLabel(i, totalCombos)
+        return `- **[${i.code}]** \`${i.url.replace(seedUrl, '') || '/'}\` — ${i.message}${hint ? ` · ${hint}` : ''}${where ? ` · _${where}_` : ''}`
+      }),
+    ].join('\n')
+  }).filter(Boolean)
 
   const lhBlock = lighthouse ? [
     '',
@@ -45,36 +120,43 @@ function buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse }) {
     '',
     ...Object.entries(lighthouse.scores).map(([k, v]) => {
       const pct = v === null ? '—' : Math.round(v * 100)
-      return `- **${k}**: ${pct}`
+      const flag = v === null ? '' : v >= 0.9 ? ' ✓' : v >= 0.5 ? ' ~' : ' ✗'
+      return `- **${k}**: ${pct}${flag}`
     }),
     ...(lighthouse.failingAudits?.length ? [
       '',
-      '### Top failing audits',
+      '#### Top failing audits',
       ...lighthouse.failingAudits.slice(0, 8).map((a) => `- \`${a.id}\` (${a.category}) — ${a.title}${a.displayValue ? ` — ${a.displayValue}` : ''}`),
     ] : []),
   ].join('\n') : ''
 
-  const urlBlocks = [...byUrl.entries()]
-    .sort((a, b) => (b[1].errors.length - a[1].errors.length) || (b[1].warn.length - a[1].warn.length))
-    .map(([url, b]) => {
-      const sections = []
-      if (b.errors.length) sections.push(`### Errors (${b.errors.length})\n\n${b.errors.join('\n')}`)
-      if (b.warn.length) sections.push(`### Warnings (${b.warn.length})\n\n${b.warn.join('\n')}`)
-      if (b.info.length) sections.push(`### Info (${b.info.length})\n\n${b.info.join('\n')}`)
-      if (sections.length === 0) sections.push(`_No findings._`)
-      return `## ${url}\n\n${sections.join('\n\n')}`
-    })
-
   return [
     `# QA Findings — ${seedUrl}`,
     ``,
-    `_Generated ${startedAt}_`,
-    `_${summary.pageCount} URL${summary.pageCount === 1 ? '' : 's'} · ${summary.browsers?.join(', ') || '?'} · ${summary.viewports?.join(', ') || '?'}_`,
+    `_Generated ${startedAt}_  `,
+    `_${summary.pageCount} URL${summary.pageCount === 1 ? '' : 's'} · ${summary.browsers?.join(', ') || '?'} × ${summary.viewports?.join(', ') || '?'} = ${totalCombos} combos_`,
     ``,
-    `**Totals:** ${totals.error || 0} error · ${totals.warn || 0} warn · ${totals.info || 0} info`,
+    `**Unique issues:** ${totals.error || 0} error · ${totals.warn || 0} warn · ${totals.info || 0} info`,
+    ``,
+    `---`,
+    ``,
+    `## Top priority (${topIssues.length})`,
+    ``,
+    topIssues.length
+      ? topIssues.map((i, idx) => {
+          const hint = reproHint({ detail: i.detail })
+          const where = combosLabel(i, totalCombos)
+          const sev = i.severity.toUpperCase()
+          return `${idx + 1}. **[${sev}] [${i.code}]** \`${i.url.replace(seedUrl, '') || '/'}\` — ${i.message}${hint ? `  \n   ↳ ${hint}` : ''}${where ? `  \n   ↳ seen on: ${where}` : ''}`
+        }).join('\n\n')
+      : `_No errors or warnings._`,
+    ``,
+    `---`,
+    ``,
+    `## By category`,
+    ``,
+    categoryBlocks.length ? categoryBlocks.join('\n\n') : `_No findings._`,
     lhBlock,
-    ``,
-    urlBlocks.join('\n\n'),
     ``,
   ].join('\n')
 }
@@ -99,24 +181,28 @@ function groupFindingsByUrl(pages) {
   return [...map.values()]
 }
 
-function findingRow(f) {
-  const detail = f.detail ? `<pre class="detail">${esc(JSON.stringify(f.detail, null, 2))}</pre>` : ''
+function issueRow(i, seedUrl, totalCombos) {
+  const detail = i.detail && Object.keys(i.detail).length
+    ? `<pre class="detail">${esc(JSON.stringify(i.detail, null, 2))}</pre>` : ''
+  const path = i.url.replace(seedUrl, '') || '/'
+  const where = combosLabel(i, totalCombos)
   return `
-    <div class="finding sev-${f.severity}">
+    <div class="finding sev-${i.severity}">
       <div class="finding-head">
-        <span class="badge" style="background:${SEV_COLOR[f.severity]}">${SEV_LABEL[f.severity]}</span>
-        <span class="code">${esc(f.code)}</span>
+        <span class="badge" style="background:${SEV_COLOR[i.severity]}">${SEV_LABEL[i.severity]}</span>
+        <span class="code">${esc(i.code)}</span>
+        <span class="path">${esc(path)}</span>
+        ${where ? `<span class="where">${esc(where)}</span>` : ''}
       </div>
-      <div class="msg">${esc(f.message)}</div>
+      <div class="msg">${esc(i.message)}</div>
       ${detail}
     </div>`
 }
 
-function pageCard(url, entries, outputDir) {
-  const findings = entries.flatMap((e) => e.findings || [])
-  const errs = countBy(findings, 'error')
-  const warns = countBy(findings, 'warn')
-  const infos = countBy(findings, 'info')
+function pageCard(url, entries, outputDir, deduped, seedUrl, totalCombos) {
+  const errs = deduped.filter((i) => i.severity === 'error').length
+  const warns = deduped.filter((i) => i.severity === 'warn').length
+  const infos = deduped.filter((i) => i.severity === 'info').length
   const shots = entries.map((e) => {
     const rel = e.screenshot ? relative(outputDir, e.screenshot) : null
     const fold = e.foldScreenshot ? relative(outputDir, e.foldScreenshot) : null
@@ -157,17 +243,33 @@ function pageCard(url, entries, outputDir) {
         </figure>`).join('')}
     </div>
     <div class="findings">
-      ${findings.length ? findings.map(findingRow).join('') : '<div class="clean">No findings</div>'}
+      ${deduped.length ? deduped.map((i) => issueRow(i, seedUrl, totalCombos)).join('') : '<div class="clean">No findings</div>'}
     </div>
   </section>`
 }
 
 export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, pages, lighthouse, summary, interactionLogs }) {
   const byUrl = groupFindingsByUrl(pages)
-  const totalFindings = pages.flatMap((p) => p.findings || [])
-  const errs = countBy(totalFindings, 'error')
-  const warns = countBy(totalFindings, 'warn')
-  const infos = countBy(totalFindings, 'info')
+  const issues = dedupIssues(pages)
+  const totalCombos = (summary.browsers?.length || 1) * (summary.viewports?.length || 1)
+  const errs = issues.filter((i) => i.severity === 'error').length
+  const warns = issues.filter((i) => i.severity === 'warn').length
+  const infos = issues.filter((i) => i.severity === 'info').length
+  const rawTotals = pages.flatMap((p) => p.findings || [])
+    .reduce((m, f) => (m[f.severity] = (m[f.severity] || 0) + 1, m), {})
+
+  // Group deduped issues per URL for the per-page screenshot cards
+  const issuesByUrl = new Map()
+  for (const i of issues) {
+    if (!issuesByUrl.has(i.url)) issuesByUrl.set(i.url, [])
+    issuesByUrl.get(i.url).push(i)
+  }
+
+  // Category-grouped priority block
+  const byCategory = CATEGORIES.map((cat) => {
+    const catIssues = issues.filter((i) => i.category === cat.id && i.severity !== 'info')
+    return { cat, items: catIssues }
+  }).filter((g) => g.items.length)
 
   const lighthouseSection = lighthouse ? `
     <section class="lh-section">
@@ -264,6 +366,23 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
   .interactions li { padding: 2px 0; font-size: 13px; color: var(--muted); }
   .interactions code { color: #90cdf4; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
   .tag { display: inline-block; font-size: 10px; background: #2d3748; color: var(--muted); padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .priority { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
+  .priority h2 { margin-top: 0; border: none; padding: 0; }
+  .priority-item { display: flex; gap: 12px; padding: 12px; border-left: 3px solid var(--border); background: #0b1120; border-radius: 4px; margin-bottom: 8px; }
+  .priority-item.sev-error { border-left-color: #fc8181; }
+  .priority-item.sev-warn { border-left-color: #f6ad55; }
+  .priority-item .rank { color: var(--muted); font-family: ui-monospace, monospace; min-width: 24px; }
+  .priority-item .body { flex: 1; }
+  .priority-item .hdr { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .priority-item .hdr .path { color: #90cdf4; font-family: ui-monospace, monospace; font-size: 12px; }
+  .priority-item .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .priority-item .where { color: var(--muted); font-size: 11px; margin-top: 2px; font-style: italic; }
+  .cat-block { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; }
+  .cat-block h3 { margin: 0 0 10px; font-size: 14px; color: var(--fg); }
+  .cat-block .cat-count { color: var(--muted); font-weight: normal; font-size: 12px; margin-left: 8px; }
+  .finding .path { color: #90cdf4; font-family: ui-monospace, monospace; font-size: 11px; }
+  .finding .where { color: var(--muted); font-size: 10px; font-style: italic; margin-left: auto; }
+  .raw-counts { color: var(--muted); font-size: 11px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -277,14 +396,53 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
   </div>
 </header>
 <section class="summary">
-  <div class="stat err"><div class="n">${errs}</div><div class="l">Errors</div></div>
-  <div class="stat warn"><div class="n">${warns}</div><div class="l">Warnings</div></div>
-  <div class="stat info"><div class="n">${infos}</div><div class="l">Info</div></div>
+  <div class="stat err"><div class="n">${errs}</div><div class="l">Unique errors</div></div>
+  <div class="stat warn"><div class="n">${warns}</div><div class="l">Unique warnings</div></div>
+  <div class="stat info"><div class="n">${infos}</div><div class="l">Unique info</div></div>
 </section>
+<div class="raw-counts" style="padding: 0 32px;">
+  Raw total (before dedup across ${totalCombos} browser × viewport combos): ${rawTotals.error || 0} error · ${rawTotals.warn || 0} warn · ${rawTotals.info || 0} info
+</div>
 <main>
+  <section class="priority">
+    <h2>Top priority (${issues.filter((i) => i.severity !== 'info').length})</h2>
+    ${issues.filter((i) => i.severity !== 'info').length === 0
+      ? '<div class="clean">No errors or warnings found — clean pass.</div>'
+      : issues.filter((i) => i.severity !== 'info').slice(0, 20).map((i, idx) => {
+          const hint = reproHint({ detail: i.detail })
+          const where = combosLabel(i, totalCombos)
+          const path = i.url.replace(seedUrl, '') || '/'
+          return `<div class="priority-item sev-${i.severity}">
+            <div class="rank">#${idx + 1}</div>
+            <div class="body">
+              <div class="hdr">
+                <span class="badge" style="background:${SEV_COLOR[i.severity]}">${SEV_LABEL[i.severity]}</span>
+                <span class="code">${esc(i.code)}</span>
+                <span class="path">${esc(path)}</span>
+              </div>
+              <div class="msg">${esc(i.message)}</div>
+              ${hint ? `<div class="hint">${esc(hint)}</div>` : ''}
+              ${where ? `<div class="where">Seen on: ${esc(where)}</div>` : ''}
+            </div>
+          </div>`
+        }).join('')}
+  </section>
+
+  <h2>By category</h2>
+  ${byCategory.length === 0
+    ? '<div class="clean">No categorised findings.</div>'
+    : byCategory.map((g) => `
+        <div class="cat-block">
+          <h3>${esc(g.cat.label)} <span class="cat-count">${g.items.length} issue${g.items.length === 1 ? '' : 's'}</span></h3>
+          <div class="findings">
+            ${g.items.map((i) => issueRow(i, seedUrl, totalCombos)).join('')}
+          </div>
+        </div>`).join('')}
+
   ${lighthouseSection}
-  <h2>Pages</h2>
-  ${byUrl.map((g) => pageCard(g.url, g.entries, outputDir)).join('')}
+
+  <h2>Per-page screenshots</h2>
+  ${byUrl.map((g) => pageCard(g.url, g.entries, outputDir, issuesByUrl.get(g.url) || [], seedUrl, totalCombos)).join('')}
 </main>
 </body>
 </html>`
@@ -297,11 +455,14 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
     seedUrl, startedAt, finishedAt, summary,
     passed: errs === 0,
     totals: { errors: errs, warnings: warns, info: infos },
-    pages, lighthouse,
+    rawTotals,
+    issues,
+    pages,
+    lighthouse,
   }, null, 2))
 
   const devMdPath = join(outputDir, 'DEVELOPER.md')
-  await writeFile(devMdPath, buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse }))
+  await writeFile(devMdPath, buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse, issues }))
 
   return { reportPath, jsonPath, devMdPath }
 }
