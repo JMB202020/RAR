@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { mkdir } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseArgs, hostSlug, timestamp, fmtDuration } from './lib/util.mjs'
@@ -22,6 +23,7 @@ Flags
   --no-interactions         skip primary-CTA / form-submit / mobile-menu tests
   --update-baseline         overwrite visual baselines with current screenshots
   --fail-on=error|warn      exit non-zero on this severity or worse (default: error)
+  --no-open                 don't auto-open report.html when finished
   --output=DIR              output directory (default: ./output/<host>-<timestamp>)
 
 Examples
@@ -55,6 +57,7 @@ async function main() {
   const lighthousePreset = args.flags.lighthouse === 'desktop' ? 'desktop' : 'mobile'
   const updateBaseline = !!args.flags['update-baseline']
   const failOn = args.flags['fail-on'] === 'warn' ? 'warn' : 'error'
+  const autoOpen = !args.flags['no-open']
 
   const host = hostSlug(seedUrl)
   const ts = timestamp()
@@ -166,6 +169,19 @@ async function main() {
   process.stdout.write(`[site-qa] report:    ${pathToFileURL(reportPath).href}\n`)
   process.stdout.write(`[site-qa] dev notes: ${devMdPath}\n`)
   process.stdout.write(`[site-qa] json:      ${jsonPath}\n`)
+
+  if (autoOpen) {
+    const cmd = process.platform === 'darwin' ? 'open'
+      : process.platform === 'win32' ? 'cmd'
+      : 'xdg-open'
+    const cmdArgs = process.platform === 'win32' ? ['/c', 'start', '""', reportPath] : [reportPath]
+    try {
+      const child = spawn(cmd, cmdArgs, { detached: true, stdio: 'ignore' })
+      child.unref()
+    } catch {
+      // Silent — user still has the printed file:// URL
+    }
+  }
 
   const shouldFail = failOn === 'warn' ? (errs + warns) > 0 : errs > 0
   process.exit(shouldFail ? 1 : 0)
