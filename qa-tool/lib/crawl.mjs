@@ -53,7 +53,10 @@ async function runOnPage({ page, url, viewport, browserName, axeSource }) {
   const start = Date.now()
   let navResponse
   try {
-    navResponse = await page.goto(url, { waitUntil: 'networkidle', timeout: 45_000 })
+    // Use 'domcontentloaded' (fast + reliable) then stabilise() handles fonts/
+    // images/networkidle with its own bounded timeout. 'networkidle' at goto
+    // time hangs forever on sites with analytics/chat/heartbeat traffic.
+    navResponse = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 })
   } catch (err) {
     return {
       url, viewport: viewport.name, browser: browserName,
