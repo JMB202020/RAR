@@ -10,15 +10,18 @@ import { slugifyUrl, sameOrigin, finding, SEVERITY } from './util.mjs'
 const require = createRequire(import.meta.url)
 
 export const VIEWPORTS = [
-  { name: 'mobile-small', width: 360, height: 780, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
-  { name: 'mobile',       width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
+  { name: 'mobile-small', width: 360, height: 780,  deviceScaleFactor: 2, isMobile: true, hasTouch: true },
+  { name: 'mobile',       width: 390, height: 844,  deviceScaleFactor: 2, isMobile: true, hasTouch: true },
   { name: 'tablet',       width: 768, height: 1024, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
-  { name: 'laptop',       width: 1280, height: 800, deviceScaleFactor: 1 },
-  { name: 'desktop',      width: 1440, height: 900, deviceScaleFactor: 1 },
+  { name: 'laptop',       width: 1280, height: 800, deviceScaleFactor: 2 },
+  { name: 'desktop',      width: 1440, height: 900, deviceScaleFactor: 2 },
   { name: 'ultrawide',    width: 1920, height: 1080, deviceScaleFactor: 1 },
 ]
 
-export const DEFAULT_VIEWPORTS = ['mobile', 'tablet', 'laptop', 'desktop']
+// Headers/hero images break most at the extremes (360 and 1920), so they ship
+// in the default set. Laptop + desktop now render at 2× DPR to catch retina
+// upscaling of hero images missing a proper srcset.
+export const DEFAULT_VIEWPORTS = ['mobile-small', 'mobile', 'tablet', 'laptop', 'desktop', 'ultrawide']
 export const DEFAULT_BROWSERS = ['chromium', 'firefox', 'webkit']
 
 async function loadAxeSource() {
@@ -205,9 +208,50 @@ export async function crawl({
             const slug = slugifyUrl(url)
             const key = `${slug}-${browserName}-${viewport.name}`
             const shotPath = join(outputDir, 'screenshots', `${key}.png`)
+            const foldPath = join(outputDir, 'screenshots', `${key}-fold.png`)
+            const heroPath = join(outputDir, 'screenshots', `${key}-hero.png`)
             await mkdir(dirname(shotPath), { recursive: true })
+
+            // 1. Full-page screenshot (existing behaviour, baseline-compared)
             const buf = await page.screenshot({ fullPage: true, type: 'png', animations: 'disabled' })
             await writeFile(shotPath, buf)
+
+            // 2. Above-the-fold screenshot (what the user sees first)
+            await page.evaluate(() => window.scrollTo(0, 0))
+            await page.waitForTimeout(100)
+            const foldBuf = await page.screenshot({ fullPage: false, type: 'png', animations: 'disabled' })
+            await writeFile(foldPath, foldBuf)
+
+            // 3. Hero-section crop: first top-of-page header/section with an image
+            const heroRect = await page.evaluate(() => {
+              const candidates = [
+                ...document.querySelectorAll('header, main > section:first-of-type, section:first-of-type, [data-hero], .hero, [class*="hero" i]')
+              ]
+              for (const el of candidates) {
+                const r = el.getBoundingClientRect()
+                if (r.top > 100 || r.height < 80) continue
+                const hasImg = el.querySelector('img, picture, video')
+                const hasBg = [el, ...el.querySelectorAll('*')].slice(0, 40).some((c) => {
+                  const bg = getComputedStyle(c).backgroundImage
+                  return bg && bg !== 'none' && !bg.startsWith('linear-gradient(')
+                })
+                if (!hasImg && !hasBg) continue
+                return {
+                  x: Math.max(0, r.left),
+                  y: Math.max(0, r.top),
+                  width: Math.min(window.innerWidth, r.width),
+                  height: Math.min(r.height, window.innerHeight * 1.5),
+                }
+              }
+              return null
+            })
+            let heroShotWritten = false
+            if (heroRect && heroRect.width > 0 && heroRect.height > 0) {
+              try {
+                await page.screenshot({ path: heroPath, clip: heroRect, type: 'png', animations: 'disabled' })
+                heroShotWritten = true
+              } catch {}
+            }
 
             const baselinePath = join(baselinesDir, `${key}.png`)
             const diffPath = join(outputDir, 'diffs', `${key}.png`)
@@ -215,6 +259,8 @@ export async function crawl({
               pngBuffer: buf, baselinePath, diffPath, updateBaseline,
             })
             res.screenshot = shotPath
+            res.foldScreenshot = foldPath
+            res.heroScreenshot = heroShotWritten ? heroPath : null
             res.baseline = baselinePath
             res.diff = visual.status === 'diff' || visual.status === 'size-changed' ? diffPath : null
             res.visual = visual

@@ -13,10 +13,36 @@ export function pageCheckScript() {
 
     const visibleText = (el) => (el.textContent || '').trim()
 
+    // Concise-but-useful CSS selector for a finding. Prefers id, else tag +
+    // up to 2 classes, optionally with nth-of-type.
+    const selectorFor = (el) => {
+      if (!el || el.nodeType !== 1) return ''
+      if (el.id) return `#${el.id}`
+      const tag = el.tagName.toLowerCase()
+      const cls = (typeof el.className === 'string' ? el.className : '')
+        .trim().split(/\s+/).filter(Boolean).slice(0, 2).join('.')
+      const base = cls ? `${tag}.${cls}` : tag
+      const parent = el.parentElement
+      if (!parent) return base
+      const siblings = [...parent.children].filter((c) => c.tagName === el.tagName)
+      if (siblings.length === 1) return base
+      const idx = siblings.indexOf(el) + 1
+      return `${base}:nth-of-type(${idx})`
+    }
+
+    const isVisible = (el) => {
+      const r = el.getBoundingClientRect()
+      if (r.width === 0 || r.height === 0) return false
+      const cs = window.getComputedStyle(el)
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false
+      return true
+    }
+
     // Broken images
     for (const img of document.images) {
       if (!img.complete || img.naturalWidth === 0) {
         push('error', 'broken-image', `Image failed to load: ${img.currentSrc || img.src}`, {
+          selector: selectorFor(img),
           src: img.currentSrc || img.src,
           alt: img.alt,
         })
@@ -27,6 +53,7 @@ export function pageCheckScript() {
     for (const img of document.images) {
       if (!img.hasAttribute('alt')) {
         push('error', 'img-missing-alt', `<img> missing alt attribute: ${img.src}`, {
+          selector: selectorFor(img),
           src: img.currentSrc || img.src,
         })
       }
@@ -149,7 +176,74 @@ export function pageCheckScript() {
       if (rect.height > 100 && visibleText(section).length === 0 && !section.querySelector('img, video, svg, canvas, iframe')) {
         push('warn', 'empty-section',
           `<${section.tagName.toLowerCase()}> appears empty (${Math.round(rect.height)}px tall)`,
-          { height: Math.round(rect.height) })
+          { height: Math.round(rect.height), selector: selectorFor(section) })
+      }
+    }
+
+    // Touch target audit (mobile/tablet viewports only — <900px)
+    if (window.innerWidth < 900) {
+      const interactive = document.querySelectorAll(
+        'a[href], button, input[type="submit"], input[type="button"], [role="button"], [role="link"]'
+      )
+      for (const el of interactive) {
+        if (!isVisible(el)) continue
+        const r = el.getBoundingClientRect()
+        if (r.width < 44 || r.height < 44) {
+          push('warn', 'touch-target-too-small',
+            `Touch target ${Math.round(r.width)}×${Math.round(r.height)}px (min 44×44): ${selectorFor(el)}`,
+            {
+              selector: selectorFor(el),
+              width: Math.round(r.width),
+              height: Math.round(r.height),
+              text: visibleText(el).slice(0, 40),
+              viewportWidth: window.innerWidth,
+            })
+        }
+      }
+    }
+
+    // Large-image / hero-image responsiveness audit
+    for (const img of document.images) {
+      const r = img.getBoundingClientRect()
+      // Only check prominent images (plausibly hero/banner/feature)
+      if (r.width < 400 || r.height < 200) continue
+      if (!isVisible(img)) continue
+
+      // srcset / responsive-image check
+      const hasSrcset = !!img.getAttribute('srcset')
+      const inPicture = !!img.closest('picture') && !!img.closest('picture').querySelector('source[srcset]')
+      if (!hasSrcset && !inPicture) {
+        push('warn', 'hero-img-no-srcset',
+          `Large image lacks srcset — retina users will see upscaled: ${img.currentSrc || img.src}`,
+          {
+            selector: selectorFor(img),
+            src: img.currentSrc || img.src,
+            rendered: { width: Math.round(r.width), height: Math.round(r.height) },
+          })
+      }
+
+      // Aspect-ratio sanity vs container (object-fit crops)
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        const imageAR = img.naturalWidth / img.naturalHeight
+        const containerAR = r.width / r.height
+        const ratio = Math.max(imageAR, containerAR) / Math.min(imageAR, containerAR)
+        if (ratio > 2.5) {
+          push('info', 'hero-img-aspect-mismatch',
+            `Image ${img.naturalWidth}×${img.naturalHeight} (AR ${imageAR.toFixed(2)}) rendered in ${Math.round(r.width)}×${Math.round(r.height)} container (AR ${containerAR.toFixed(2)}) — heavy crop likely`,
+            {
+              selector: selectorFor(img),
+              natural: { w: img.naturalWidth, h: img.naturalHeight },
+              rendered: { w: Math.round(r.width), h: Math.round(r.height) },
+              ratio: +ratio.toFixed(2),
+            })
+        }
+      }
+
+      // Missing width/height hints → CLS risk
+      if (!img.hasAttribute('width') || !img.hasAttribute('height')) {
+        push('info', 'hero-img-no-dimensions',
+          `Large image missing width/height attributes — can cause CLS: ${img.currentSrc || img.src}`,
+          { selector: selectorFor(img), src: img.currentSrc || img.src })
       }
     }
 

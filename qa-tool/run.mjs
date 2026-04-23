@@ -13,8 +13,9 @@ const USAGE = `site-qa — professional local QA for any URL
 Flags
   --max-pages=N             cap crawl to N unique URLs (default: 25)
   --only=url1,url2          only test these exact URLs (still need seed)
-  --viewports=a,b,c         viewport set. Default: mobile,tablet,laptop,desktop
-                            Available: mobile-small, mobile, tablet, laptop, desktop, ultrawide
+  --viewports=a,b,c         viewport set. Default: all six
+                            Available: mobile-small(360), mobile(390), tablet(768),
+                                       laptop(1280 @2x), desktop(1440 @2x), ultrawide(1920)
   --browsers=a,b,c          browser set. Default: chromium,firefox,webkit
   --no-lighthouse           skip Lighthouse
   --lighthouse=desktop      Lighthouse preset (default: mobile)
@@ -127,7 +128,7 @@ async function main() {
   const finishedAt = new Date()
   const duration = fmtDuration(finishedAt - startedAt)
 
-  const { reportPath, jsonPath } = await writeReport({
+  const { reportPath, jsonPath, devMdPath } = await writeReport({
     outputDir,
     seedUrl,
     startedAt: startedAt.toISOString(),
@@ -151,8 +152,9 @@ async function main() {
   const infos = all.filter((f) => f.severity === 'info').length
 
   process.stdout.write(`\n[site-qa] findings: ${errs} error, ${warns} warn, ${infos} info\n`)
-  process.stdout.write(`[site-qa] report: ${pathToFileURL(reportPath).href}\n`)
-  process.stdout.write(`[site-qa] json:   ${jsonPath}\n`)
+  process.stdout.write(`[site-qa] report:    ${pathToFileURL(reportPath).href}\n`)
+  process.stdout.write(`[site-qa] dev notes: ${devMdPath}\n`)
+  process.stdout.write(`[site-qa] json:      ${jsonPath}\n`)
 
   const shouldFail = failOn === 'warn' ? (errs + warns) > 0 : errs > 0
   process.exit(shouldFail ? 1 : 0)

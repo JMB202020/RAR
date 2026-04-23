@@ -209,7 +209,7 @@ export async function runInteractions({ page, url }) {
     await page.unroute('**/*').catch(() => {})
   }
 
-  // --- 3. Mobile nav toggle (only matters on narrow viewports) ---
+  // --- 3. Mobile nav toggle + *verify* panel actually reveals links ---
   try {
     const vw = page.viewportSize()?.width ?? 0
     if (vw > 0 && vw < 900) {
@@ -221,22 +221,277 @@ export async function runInteractions({ page, url }) {
         'button.menu-toggle',
         '[data-toggle="menu"]',
       ]
+      let clicked = null
       for (const sel of togglers) {
         const loc = page.locator(sel).first()
         if (await loc.isVisible({ timeout: 200 }).catch(() => false)) {
           const errorsBefore = preErrors.length
           await loc.click({ timeout: 1000, force: true }).catch(() => {})
-          await page.waitForTimeout(300)
+          await page.waitForTimeout(400)
+          clicked = sel
           const newErrors = preErrors.slice(errorsBefore)
           if (newErrors.length) {
-            findings.push(finding(SEVERITY.WARN, 'interaction-menu-error',
-              `Mobile menu toggle produced errors`, { selector: sel, errors: newErrors.slice(0, 3) }))
-          } else {
-            log.push({ step: 'mobile-menu-opened', selector: sel })
+            findings.push(finding(SEVERITY.ERROR, 'mobile-menu-click-error',
+              `Clicking mobile menu toggle produced ${newErrors.length} error(s)`,
+              { selector: sel, errors: newErrors.slice(0, 3) }))
           }
           break
         }
       }
+
+      if (clicked) {
+        const panel = await page.evaluate((toggleSel) => {
+          const btn = document.querySelector(toggleSel)
+          if (!btn) return { reason: 'toggle-not-found' }
+          const controls = btn.getAttribute('aria-controls')
+          let panelEl = controls ? document.getElementById(controls) : null
+          if (!panelEl) {
+            // Fall back: a nav/ul inside an expanded=true ancestor, or visible nav in body
+            panelEl = document.querySelector('[aria-expanded="true"] nav, [aria-expanded="true"] ul')
+              || [...document.querySelectorAll('nav, [role="navigation"]')].find((n) => {
+                const r = n.getBoundingClientRect()
+                const cs = getComputedStyle(n)
+                return r.height > 50 && cs.visibility !== 'hidden' && cs.display !== 'none'
+              })
+          }
+          if (!panelEl) return { reason: 'panel-not-found' }
+          const r = panelEl.getBoundingClientRect()
+          const links = [...panelEl.querySelectorAll('a[href]')].filter((a) => {
+            const ar = a.getBoundingClientRect()
+            const cs = getComputedStyle(a)
+            return ar.width > 0 && ar.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'
+          })
+          return {
+            visible: r.height > 10 && r.width > 10,
+            linkCount: links.length,
+            height: Math.round(r.height),
+            firstLink: links[0] ? (links[0].getAttribute('href') || '') : null,
+          }
+        }, clicked)
+
+        if (panel.reason === 'panel-not-found') {
+          findings.push(finding(SEVERITY.ERROR, 'mobile-menu-no-panel',
+            `Clicking ${clicked} did not reveal a navigation panel (no aria-controls target + no visible nav)`,
+            { selector: clicked }))
+        } else if (!panel.visible || panel.linkCount === 0) {
+          findings.push(finding(SEVERITY.ERROR, 'mobile-menu-empty',
+            `Mobile menu opened but contains ${panel.linkCount} visible link(s). Expected: nav links. Repro: at mobile viewport (${vw}px), click ${clicked}`,
+            { selector: clicked, linkCount: panel.linkCount, panelHeight: panel.height }))
+        } else {
+          log.push({ step: 'mobile-menu-verified', selector: clicked, links: panel.linkCount })
+        }
+      } else {
+        log.push({ step: 'mobile-menu-not-found' })
+      }
+    }
+  } catch (err) {
+    findings.push(finding(SEVERITY.WARN, 'interaction-menu-failed',
+      `Mobile menu check failed: ${err.message}`))
+  }
+
+  // --- 4. Nav link health: HEAD each primary-nav link, check hash targets ---
+  try {
+    const navLinks = await page.evaluate(() => {
+      const nav = document.querySelector('header nav, nav[role="navigation"], header [role="navigation"], nav')
+      if (!nav) return []
+      return [...nav.querySelectorAll('a[href]')]
+        .map((a) => a.getAttribute('href'))
+        .filter((h) => h && h !== '#' && !h.startsWith('javascript:'))
+        .slice(0, 15)
+    })
+    for (const href of navLinks) {
+      if (href.startsWith('#')) {
+        const id = href.slice(1)
+        if (!id) continue
+        const exists = await page.evaluate((i) => !!document.getElementById(i), id)
+        if (!exists) {
+          findings.push(finding(SEVERITY.WARN, 'nav-hash-target-missing',
+            `Nav link points to #${id} but no element with that id exists`,
+            { href, id }))
+        }
+        continue
+      }
+      let resolved
+      try { resolved = new URL(href, page.url()).href } catch { continue }
+      try {
+        const res = await page.request.fetch(resolved, { method: 'HEAD', timeout: 8000 })
+        if (res.status() >= 400) {
+          findings.push(finding(
+            res.status() >= 500 ? SEVERITY.ERROR : SEVERITY.WARN,
+            'nav-link-broken',
+            `Nav link returns HTTP ${res.status()}: ${resolved}`,
+            { href, status: res.status() }))
+        }
+      } catch (err) {
+        findings.push(finding(SEVERITY.WARN, 'nav-link-unreachable',
+          `Nav link unreachable: ${resolved} (${err.message})`,
+          { href, error: err.message }))
+      }
+    }
+    log.push({ step: 'nav-links-checked', count: navLinks.length })
+  } catch (err) {
+    // Non-fatal: nav-link health is additive
+  }
+
+  // --- 5. Sticky header sanity: scroll and verify header stays usable ---
+  try {
+    const headerInfo = await page.evaluate(() => {
+      const h = document.querySelector('header, [role="banner"]')
+      if (!h) return null
+      const cs = getComputedStyle(h)
+      const r = h.getBoundingClientRect()
+      return {
+        position: cs.position,
+        top: Math.round(r.top),
+        height: Math.round(r.height),
+        sticky: cs.position === 'sticky' || cs.position === 'fixed',
+        zIndex: cs.zIndex,
+      }
+    })
+    if (headerInfo && headerInfo.sticky) {
+      await page.evaluate(() => window.scrollTo(0, 800))
+      await page.waitForTimeout(200)
+      const afterScroll = await page.evaluate(() => {
+        const h = document.querySelector('header, [role="banner"]')
+        if (!h) return null
+        const r = h.getBoundingClientRect()
+        const cs = getComputedStyle(h)
+        return {
+          top: Math.round(r.top),
+          height: Math.round(r.height),
+          bottom: Math.round(r.bottom),
+          hidden: cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) === 0,
+        }
+      })
+      await page.evaluate(() => window.scrollTo(0, 0))
+      if (afterScroll) {
+        if (afterScroll.hidden) {
+          findings.push(finding(SEVERITY.WARN, 'sticky-header-hidden-on-scroll',
+            `Header is position:${headerInfo.position} but becomes hidden after scrolling`,
+            { before: headerInfo, after: afterScroll }))
+        } else if (afterScroll.top > 5 || afterScroll.bottom < 0) {
+          findings.push(finding(SEVERITY.WARN, 'sticky-header-off-screen',
+            `Sticky header not pinned after scroll (top=${afterScroll.top}, bottom=${afterScroll.bottom})`,
+            { before: headerInfo, after: afterScroll }))
+        } else {
+          const vh = page.viewportSize()?.height ?? 0
+          if (vh > 0 && afterScroll.height > vh * 0.3) {
+            findings.push(finding(SEVERITY.WARN, 'sticky-header-too-tall',
+              `Sticky header ${afterScroll.height}px covers ${Math.round(afterScroll.height / vh * 100)}% of viewport height`,
+              { headerHeight: afterScroll.height, viewportHeight: vh }))
+          }
+          log.push({ step: 'sticky-header-ok', height: afterScroll.height })
+        }
+      }
+    }
+  } catch {}
+
+  // --- 6. Form validation UX: submit empty, submit invalid email ---
+  try {
+    const hasForm = await page.locator('form').first().isVisible({ timeout: 300 }).catch(() => false)
+    if (hasForm) {
+      // Intercept so nothing leaves the machine
+      await page.route('**/*', (route) => {
+        const req = route.request()
+        if (['POST', 'PUT', 'PATCH'].includes(req.method())) {
+          return route.fulfill({ status: 200, contentType: 'application/json', body: '{"qa":"intercepted"}' })
+        }
+        return route.continue()
+      })
+
+      // Reload to get a clean form state
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {})
+      await page.waitForTimeout(300)
+
+      // Submit empty
+      const submitEmpty = page.locator('form button[type="submit"], form input[type="submit"], form button:not([type])').first()
+      if (await submitEmpty.isVisible({ timeout: 500 }).catch(() => false)) {
+        await submitEmpty.click({ timeout: 1500, force: true }).catch(() => {})
+        await page.waitForTimeout(400)
+        const emptyValidation = await page.evaluate(() => {
+          const form = document.querySelector('form')
+          if (!form) return { ok: false, reason: 'no-form' }
+          const invalids = form.querySelectorAll(':invalid')
+          const ariaInvalid = form.querySelectorAll('[aria-invalid="true"]')
+          const errorText = [...form.querySelectorAll('[class*="error" i], [role="alert"], [aria-live]')]
+            .filter((el) => {
+              const r = el.getBoundingClientRect()
+              return r.width > 0 && r.height > 0 && (el.textContent || '').trim().length > 0
+            })
+          const hasRequired = form.querySelectorAll('[required]').length
+          return {
+            invalidCount: invalids.length,
+            ariaInvalidCount: ariaInvalid.length,
+            errorTextCount: errorText.length,
+            hasRequired,
+          }
+        })
+        if (emptyValidation.hasRequired > 0
+            && emptyValidation.invalidCount === 0
+            && emptyValidation.ariaInvalidCount === 0
+            && emptyValidation.errorTextCount === 0) {
+          findings.push(finding(SEVERITY.WARN, 'form-no-empty-validation',
+            `Form submits with empty required fields — no :invalid, aria-invalid, or error UI surfaced`,
+            emptyValidation))
+        } else {
+          log.push({ step: 'form-empty-validation-ok', ...emptyValidation })
+        }
+      }
+
+      // Invalid email test
+      const emailField = page.locator('form input[type="email"], form input[name*="email" i]').first()
+      if (await emailField.isVisible({ timeout: 300 }).catch(() => false)) {
+        await emailField.fill('not-an-email', { timeout: 1000 }).catch(() => {})
+        if (await submitEmpty.isVisible({ timeout: 300 }).catch(() => false)) {
+          await submitEmpty.click({ timeout: 1500, force: true }).catch(() => {})
+          await page.waitForTimeout(400)
+        }
+        const emailValidation = await page.evaluate(() => {
+          const input = document.querySelector('form input[type="email"], form input[name*="email" i]')
+          if (!input) return null
+          return { valid: input.validity?.valid ?? null, value: input.value }
+        })
+        if (emailValidation && emailValidation.valid === true) {
+          findings.push(finding(SEVERITY.WARN, 'form-accepts-invalid-email',
+            `Email field accepts invalid value "${emailValidation.value}" (missing type="email" or pattern validation)`,
+            emailValidation))
+        }
+      }
+
+      await page.unroute('**/*').catch(() => {})
+    }
+  } catch {}
+
+  // --- 7. Focus-ring visibility: Tab through first N focusables, verify outline/shadow ---
+  try {
+    await page.evaluate(() => window.scrollTo(0, 0))
+    // Start from a known anchor
+    await page.evaluate(() => (document.body.tabIndex = -1, document.body.focus()))
+    const ringSample = []
+    const SAMPLE = 8
+    for (let i = 0; i < SAMPLE; i++) {
+      await page.keyboard.press('Tab')
+      const info = await page.evaluate(() => {
+        const el = document.activeElement
+        if (!el || el === document.body) return null
+        const cs = getComputedStyle(el)
+        const hasOutline = cs.outlineStyle && cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0
+        const hasShadow = cs.boxShadow && cs.boxShadow !== 'none'
+        const hasRing = hasOutline || hasShadow
+        const selector = el.id
+          ? `#${el.id}`
+          : `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}`
+        return { tag: el.tagName.toLowerCase(), selector, hasRing, outline: cs.outline, boxShadow: cs.boxShadow.slice(0, 80) }
+      })
+      if (info) ringSample.push(info)
+    }
+    const missing = ringSample.filter((r) => !r.hasRing)
+    if (missing.length > 0) {
+      findings.push(finding(SEVERITY.WARN, 'no-focus-ring',
+        `${missing.length} of ${ringSample.length} tabbable elements have no visible focus indicator (outline:none + no box-shadow)`,
+        { sample: missing.slice(0, 5) }))
+    } else if (ringSample.length > 0) {
+      log.push({ step: 'focus-rings-ok', sampled: ringSample.length })
     }
   } catch {}
 

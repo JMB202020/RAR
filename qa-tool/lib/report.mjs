@@ -1,6 +1,84 @@
 import { writeFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 
+const SEV_ORDER = { error: 0, warn: 1, info: 2 }
+const SEV_MD = { error: 'Errors', warn: 'Warnings', info: 'Info' }
+
+// Collapse deeply-nested detail into a terse one-line hint a dev can act on.
+function reproHint(f) {
+  const d = f.detail || {}
+  const bits = []
+  if (d.selector) bits.push(`selector \`${d.selector}\``)
+  if (d.src) bits.push(`src \`${d.src}\``)
+  if (d.href) bits.push(`href \`${d.href}\``)
+  if (d.width !== undefined && d.height !== undefined) bits.push(`size ${d.width}×${d.height}`)
+  if (d.viewportWidth) bits.push(`viewport ${d.viewportWidth}px`)
+  if (d.status) bits.push(`HTTP ${d.status}`)
+  if (d.impact) bits.push(`impact: ${d.impact}`)
+  if (d.offenders && d.offenders.length) bits.push(`offenders: ${d.offenders.map((o) => o.tag + (o.classes ? '.' + o.classes.split(' ').slice(0, 2).join('.') : '')).slice(0, 2).join(', ')}`)
+  return bits.join(' · ')
+}
+
+// Build the DEVELOPER.md — one-line-per-finding, grouped by URL then severity.
+function buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse }) {
+  const byUrl = new Map()
+  for (const p of pages) {
+    const key = p.url
+    if (!byUrl.has(key)) byUrl.set(key, { errors: [], warn: [], info: [], meta: [] })
+    const bucket = byUrl.get(key)
+    for (const f of p.findings || []) {
+      const ctx = p.browser && p.viewport ? ` (${p.browser}/${p.viewport})` : ''
+      const hint = reproHint(f)
+      const line = `- **[${f.code}]**${ctx} ${f.message}${hint ? ` — ${hint}` : ''}`
+      if (f.severity === 'error') bucket.errors.push(line)
+      else if (f.severity === 'warn') bucket.warn.push(line)
+      else bucket.info.push(line)
+    }
+  }
+
+  const totals = { error: 0, warn: 0, info: 0 }
+  for (const f of pages.flatMap((p) => p.findings || [])) totals[f.severity] = (totals[f.severity] || 0) + 1
+
+  const lhBlock = lighthouse ? [
+    '',
+    `## Lighthouse (${lighthouse.preset})`,
+    '',
+    ...Object.entries(lighthouse.scores).map(([k, v]) => {
+      const pct = v === null ? '—' : Math.round(v * 100)
+      return `- **${k}**: ${pct}`
+    }),
+    ...(lighthouse.failingAudits?.length ? [
+      '',
+      '### Top failing audits',
+      ...lighthouse.failingAudits.slice(0, 8).map((a) => `- \`${a.id}\` (${a.category}) — ${a.title}${a.displayValue ? ` — ${a.displayValue}` : ''}`),
+    ] : []),
+  ].join('\n') : ''
+
+  const urlBlocks = [...byUrl.entries()]
+    .sort((a, b) => (b[1].errors.length - a[1].errors.length) || (b[1].warn.length - a[1].warn.length))
+    .map(([url, b]) => {
+      const sections = []
+      if (b.errors.length) sections.push(`### Errors (${b.errors.length})\n\n${b.errors.join('\n')}`)
+      if (b.warn.length) sections.push(`### Warnings (${b.warn.length})\n\n${b.warn.join('\n')}`)
+      if (b.info.length) sections.push(`### Info (${b.info.length})\n\n${b.info.join('\n')}`)
+      if (sections.length === 0) sections.push(`_No findings._`)
+      return `## ${url}\n\n${sections.join('\n\n')}`
+    })
+
+  return [
+    `# QA Findings — ${seedUrl}`,
+    ``,
+    `_Generated ${startedAt}_`,
+    `_${summary.pageCount} URL${summary.pageCount === 1 ? '' : 's'} · ${summary.browsers?.join(', ') || '?'} · ${summary.viewports?.join(', ') || '?'}_`,
+    ``,
+    `**Totals:** ${totals.error || 0} error · ${totals.warn || 0} warn · ${totals.info || 0} info`,
+    lhBlock,
+    ``,
+    urlBlocks.join('\n\n'),
+    ``,
+  ].join('\n')
+}
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[c]))
@@ -41,9 +119,11 @@ function pageCard(url, entries, outputDir) {
   const infos = countBy(findings, 'info')
   const shots = entries.map((e) => {
     const rel = e.screenshot ? relative(outputDir, e.screenshot) : null
+    const fold = e.foldScreenshot ? relative(outputDir, e.foldScreenshot) : null
+    const hero = e.heroScreenshot ? relative(outputDir, e.heroScreenshot) : null
     const diff = e.diff ? relative(outputDir, e.diff) : null
     return {
-      viewport: e.viewport, browser: e.browser, rel, diff, visual: e.visual,
+      viewport: e.viewport, browser: e.browser, rel, fold, hero, diff, visual: e.visual,
       status: e.status, loadMs: e.loadMs, consent: e.consent,
     }
   })
@@ -68,7 +148,11 @@ function pageCard(url, entries, outputDir) {
             ${esc(s.browser || '')} / ${esc(s.viewport)} — HTTP ${s.status} — ${s.loadMs}ms${s.visual ? ` — ${esc(s.visual.status)}` : ''}
             ${s.consent?.dismissed ? ` · <span class="tag">consent dismissed</span>` : ''}
           </figcaption>
-          ${s.rel ? `<a href="${esc(s.rel)}" target="_blank"><img loading="lazy" src="${esc(s.rel)}" alt="${esc(s.browser || '')} ${esc(s.viewport)} screenshot"></a>` : '<div class="no-shot">no screenshot</div>'}
+          <div class="shot-grid">
+            ${s.fold ? `<div class="shot-tile"><div class="shot-label">above-the-fold</div><a href="${esc(s.fold)}" target="_blank"><img loading="lazy" src="${esc(s.fold)}" alt="above-the-fold"></a></div>` : ''}
+            ${s.hero ? `<div class="shot-tile"><div class="shot-label">hero crop</div><a href="${esc(s.hero)}" target="_blank"><img loading="lazy" src="${esc(s.hero)}" alt="hero crop"></a></div>` : ''}
+            ${s.rel ? `<div class="shot-tile"><div class="shot-label">full page</div><a href="${esc(s.rel)}" target="_blank"><img loading="lazy" src="${esc(s.rel)}" alt="full page"></a></div>` : '<div class="no-shot">no screenshot</div>'}
+          </div>
           ${s.diff ? `<a href="${esc(s.diff)}" target="_blank" class="diff-link">view pixel diff</a>` : ''}
         </figure>`).join('')}
     </div>
@@ -146,6 +230,9 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
   figure { margin: 0; background: #0b1120; border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
   figcaption { color: var(--muted); font-size: 12px; padding-bottom: 6px; }
   figure img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  .shot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .shot-tile { display: flex; flex-direction: column; gap: 4px; }
+  .shot-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
   .diff-link { display: inline-block; margin-top: 6px; font-size: 12px; color: #f6ad55; }
   .no-shot { color: var(--muted); padding: 40px; text-align: center; font-size: 12px; }
   .findings { display: flex; flex-direction: column; gap: 8px; }
@@ -213,5 +300,8 @@ export async function writeReport({ outputDir, seedUrl, startedAt, finishedAt, p
     pages, lighthouse,
   }, null, 2))
 
-  return { reportPath, jsonPath }
+  const devMdPath = join(outputDir, 'DEVELOPER.md')
+  await writeFile(devMdPath, buildDeveloperMd({ seedUrl, startedAt, summary, pages, lighthouse }))
+
+  return { reportPath, jsonPath, devMdPath }
 }
