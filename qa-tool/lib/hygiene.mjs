@@ -98,27 +98,39 @@ export async function dismissConsent(page) {
 }
 
 export async function stabilise(page) {
-  // After hygiene CSS is in + consent dismissed, wait for fonts + images.
-  try { await page.evaluate(() => document.fonts && document.fonts.ready) } catch {}
-  try {
-    await page.evaluate(() => Promise.all(
-      [...document.images]
-        .filter((i) => !i.complete)
-        .map((i) => new Promise((r) => { i.onload = i.onerror = r }))
-    ))
-  } catch {}
-  // Scroll to the bottom + back to top to trigger lazy-loaded content,
-  // then wait for network to settle.
+  // 1. Scroll first so lazy-loaded images start fetching BEFORE we wait on them.
   try {
     await page.evaluate(async () => {
       const step = 600
       for (let y = 0; y < document.body.scrollHeight; y += step) {
         window.scrollTo(0, y)
-        await new Promise((r) => setTimeout(r, 60))
+        await new Promise((r) => setTimeout(r, 50))
       }
       window.scrollTo(0, 0)
     })
   } catch {}
-  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {})
-  await page.waitForTimeout(200)
+
+  // 2. Fonts + images, each bounded with an overall 4s cap. A broken image
+  //    that never fires load/error (unreachable CDN, infinite redirect) must
+  //    never stall the whole run.
+  try {
+    await page.evaluate(() => Promise.race([
+      new Promise((resolve) => setTimeout(resolve, 4000)),
+      Promise.all([
+        (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve(),
+        ...[...document.images]
+          .filter((i) => !i.complete)
+          .map((i) => new Promise((r) => {
+            i.onload = r
+            i.onerror = r
+            // Safety: resolve after 3s even if no event fires
+            setTimeout(r, 3000)
+          })),
+      ]),
+    ]))
+  } catch {}
+
+  // 3. Short networkidle settle so analytics-heavy pages can quiet down.
+  await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {})
+  await page.waitForTimeout(150)
 }
