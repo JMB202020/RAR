@@ -184,10 +184,20 @@ export async function crawl({
       if (onlySet && !onlySet.has(url)) continue
       visited.add(url)
 
+      const urlStart = Date.now()
+      const urlIndex = visited.size
+      const comboCount = activeBrowsers.length * activeVps.length
+      process.stdout.write(`\n[site-qa] [${urlIndex}] ${url}  (${comboCount} combos, queue: ${queue.length})\n`)
+
       let collectedLinks = null
+      let urlFindingCount = 0
 
       for (const browserName of activeBrowsers) {
         for (const viewport of activeVps) {
+          const comboStart = Date.now()
+          const label = `${browserName.padEnd(8)} / ${viewport.name.padEnd(12)}`
+          process.stdout.write(`[site-qa]   ${label} ...`)
+
           const browser = launched[browserName]
           const context = await browser.newContext({
             viewport: { width: viewport.width, height: viewport.height },
@@ -276,6 +286,7 @@ export async function crawl({
 
             // Interaction tests run once per URL on the primary browser+viewport.
             if (runInteractionTests && browserName === primaryBrowser && viewport.name === primaryViewport) {
+              process.stdout.write(` + interactions`)
               const iresult = await runInteractions({ page, url })
               res.findings.push(...iresult.findings)
               res.interactions = iresult.log
@@ -290,12 +301,26 @@ export async function crawl({
             await context.close()
           }
           results.push(res)
+
+          const fc = (res.findings || []).length
+          urlFindingCount += fc
+          const sec = ((Date.now() - comboStart) / 1000).toFixed(1)
+          const visualTag = res.visual ? ` [${res.visual.status}]` : ''
+          process.stdout.write(` ${sec}s · ${fc} finding${fc === 1 ? '' : 's'}${visualTag}\n`)
         }
       }
 
+      const urlSec = ((Date.now() - urlStart) / 1000).toFixed(1)
+      process.stdout.write(`[site-qa]   → url done in ${urlSec}s · ${urlFindingCount} total finding${urlFindingCount === 1 ? '' : 's'}\n`)
+
       if (collectedLinks) {
+        const beforeQ = queue.length
         for (const link of collectedLinks) {
           if (!visited.has(link) && sameOrigin(link, seedUrl)) queue.push(link)
+        }
+        const added = queue.length - beforeQ
+        if (added > 0) {
+          process.stdout.write(`[site-qa]   + queued ${added} new link${added === 1 ? '' : 's'} (queue depth: ${queue.length})\n`)
         }
       }
     }
