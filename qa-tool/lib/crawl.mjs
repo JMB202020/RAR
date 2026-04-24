@@ -202,19 +202,29 @@ export async function crawl({
           process.stdout.write(`[site-qa]   ${label} ...`)
 
           const browser = launched[browserName]
-          const context = await browser.newContext({
-            viewport: { width: viewport.width, height: viewport.height },
-            deviceScaleFactor: viewport.deviceScaleFactor,
-            isMobile: viewport.isMobile && browserName !== 'firefox',
-            hasTouch: viewport.hasTouch,
-            userAgent: viewport.isMobile
-              ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 site-qa'
-              : undefined,
-            reducedMotion: 'reduce',
-          })
+          let context
+          try {
+            context = await browser.newContext({
+              viewport: { width: viewport.width, height: viewport.height },
+              deviceScaleFactor: viewport.deviceScaleFactor,
+              isMobile: viewport.isMobile && browserName !== 'firefox',
+              hasTouch: viewport.hasTouch,
+              userAgent: viewport.isMobile
+                ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 site-qa'
+                : undefined,
+              reducedMotion: 'reduce',
+            })
+          } catch (err) {
+            process.stdout.write(` skipped (context: ${err.message.slice(0, 80)})\n`)
+            continue
+          }
           const page = await context.newPage()
           await installHygiene(page)
-          let res
+          let res = {
+            url, viewport: viewport.name, browser: browserName,
+            loadMs: 0, status: 0, findings: [], links: [], screenshot: null,
+          }
+          let comboFatal = null
           try {
             res = await runOnPage({ page, url, viewport, browserName, axeSource })
 
@@ -225,15 +235,48 @@ export async function crawl({
             const heroPath = join(outputDir, 'screenshots', `${key}-hero.png`)
             await mkdir(dirname(shotPath), { recursive: true })
 
-            // 1. Full-page screenshot (existing behaviour, baseline-compared)
-            const buf = await page.screenshot({ fullPage: true, type: 'png', animations: 'disabled' })
-            await writeFile(shotPath, buf)
+            // 1. Full-page screenshot. PNG / browser limits cap at 32767 pixels
+            //    on either axis. For very tall pages (galleries, blog archives)
+            //    we fall back to a clipped capture of the top 32000px so the
+            //    run never dies on a single oversize page.
+            let buf
+            try {
+              buf = await page.screenshot({ fullPage: true, type: 'png', animations: 'disabled' })
+            } catch (err) {
+              if (/larger than|exceeds|too large/i.test(err.message)) {
+                const dims = await page.evaluate(() => ({
+                  width: Math.min(document.documentElement.scrollWidth, 32000),
+                  height: Math.min(document.documentElement.scrollHeight, 32000),
+                })).catch(() => ({ width: 1440, height: 32000 }))
+                try {
+                  buf = await page.screenshot({
+                    clip: { x: 0, y: 0, width: dims.width, height: dims.height },
+                    type: 'png',
+                    animations: 'disabled',
+                  })
+                  res.findings.push(finding(SEVERITY.WARN, 'screenshot-truncated',
+                    `Page is taller than 32767px (PNG limit) — captured top ${dims.height}px only`,
+                    { capturedHeight: dims.height, capturedWidth: dims.width }))
+                } catch (e2) {
+                  res.findings.push(finding(SEVERITY.ERROR, 'screenshot-failed',
+                    `Full-page screenshot failed: ${e2.message}`, { error: e2.message }))
+                }
+              } else {
+                res.findings.push(finding(SEVERITY.ERROR, 'screenshot-failed',
+                  `Full-page screenshot failed: ${err.message}`, { error: err.message }))
+              }
+            }
+            if (buf) await writeFile(shotPath, buf)
 
             // 2. Above-the-fold screenshot (what the user sees first)
             await page.evaluate(() => window.scrollTo(0, 0))
             await page.waitForTimeout(100)
-            const foldBuf = await page.screenshot({ fullPage: false, type: 'png', animations: 'disabled' })
-            await writeFile(foldPath, foldBuf)
+            let foldWritten = false
+            try {
+              const foldBuf = await page.screenshot({ fullPage: false, type: 'png', animations: 'disabled' })
+              await writeFile(foldPath, foldBuf)
+              foldWritten = true
+            } catch {}
 
             // 3. Hero-section crop: first top-of-page header/section with an image
             const heroRect = await page.evaluate(() => {
@@ -268,23 +311,32 @@ export async function crawl({
 
             const baselinePath = join(baselinesDir, `${key}.png`)
             const diffPath = join(outputDir, 'diffs', `${key}.png`)
-            const visual = await compareOrSave({
-              pngBuffer: buf, baselinePath, diffPath, updateBaseline,
-            })
-            res.screenshot = shotPath
-            res.foldScreenshot = foldPath
+            res.screenshot = buf ? shotPath : null
+            res.foldScreenshot = foldWritten ? foldPath : null
             res.heroScreenshot = heroShotWritten ? heroPath : null
             res.baseline = baselinePath
-            res.diff = visual.status === 'diff' || visual.status === 'size-changed' ? diffPath : null
-            res.visual = visual
-            if (visual.status === 'diff' && visual.diffRatio > 0.01) {
-              res.findings.push(finding(SEVERITY.WARN, 'visual-regression',
-                `Visual diff vs baseline: ${(visual.diffRatio * 100).toFixed(2)}% of pixels changed`,
-                visual))
-            }
-            if (visual.status === 'size-changed') {
-              res.findings.push(finding(SEVERITY.WARN, 'visual-size-changed',
-                `Screenshot size changed vs baseline`, visual))
+
+            // Skip baseline compare if the screenshot itself failed.
+            if (buf) {
+              try {
+                const visual = await compareOrSave({
+                  pngBuffer: buf, baselinePath, diffPath, updateBaseline,
+                })
+                res.diff = visual.status === 'diff' || visual.status === 'size-changed' ? diffPath : null
+                res.visual = visual
+                if (visual.status === 'diff' && visual.diffRatio > 0.01) {
+                  res.findings.push(finding(SEVERITY.WARN, 'visual-regression',
+                    `Visual diff vs baseline: ${(visual.diffRatio * 100).toFixed(2)}% of pixels changed`,
+                    visual))
+                }
+                if (visual.status === 'size-changed') {
+                  res.findings.push(finding(SEVERITY.WARN, 'visual-size-changed',
+                    `Screenshot size changed vs baseline`, visual))
+                }
+              } catch (err) {
+                res.findings.push(finding(SEVERITY.WARN, 'visual-compare-failed',
+                  `Visual baseline compare failed: ${err.message}`, { error: err.message }))
+              }
             }
 
             // Interaction tests run once per URL on the primary browser+viewport.
@@ -300,15 +352,20 @@ export async function crawl({
             if (browserName === primaryBrowser && viewport.name === primaryViewport) {
               collectedLinks = res.links
             }
+          } catch (err) {
+            // Catch-all so one bad combo can't kill the whole site QA run.
+            comboFatal = err
+            res.findings.push(finding(SEVERITY.ERROR, 'combo-failed',
+              `Combo crashed: ${err.message}`, { error: err.message, stack: err.stack?.slice(0, 500) }))
           } finally {
-            await context.close()
+            try { await context.close() } catch {}
           }
           results.push(res)
 
           const fc = (res.findings || []).length
           urlFindingCount += fc
           const sec = ((Date.now() - comboStart) / 1000).toFixed(1)
-          const visualTag = res.visual ? ` [${res.visual.status}]` : ''
+          const visualTag = res.visual ? ` [${res.visual.status}]` : (comboFatal ? ' [crashed]' : '')
           process.stdout.write(` ${sec}s · ${fc} finding${fc === 1 ? '' : 's'}${visualTag}\n`)
         }
       }
